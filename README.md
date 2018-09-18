@@ -1,1 +1,3 @@
 # PITT
+
+![logo](Logo.png)
