@@ -24,3 +24,6 @@ hs_err_pid*
 
 # iOS
 *.DS_Store
+
+# optional?
+.idea/
