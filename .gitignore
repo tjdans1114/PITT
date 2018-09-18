@@ -25,5 +25,8 @@ hs_err_pid*
 # iOS
 *.DS_Store
 
-# optional?
-.idea/
+# .idea
+.idea/*/
+.idea/workspace.xml
+.idea/markdown-navigator.xml
+.idea/vcs.xml
