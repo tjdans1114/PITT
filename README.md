@@ -16,3 +16,10 @@ need to know : Socket, Thread, I/O,
     * http://tutorials.jenkov.com/java-io/index.html
 
 [comment]: asdf
+
+## Summary?
+
+### Java NIO 
+* currently reading overview
+- Channel & Buffer : Data is always read from a channel into a buffer, or written from a buffer to a channel
+- Selector : A selector is an object that can monitor multiple channels for events (like: connection opened, data arrived etc.). Thus, a single thread can monitor multiple channels for data. [Role of Event Queue?]
