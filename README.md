@@ -7,19 +7,27 @@
 watch `/Documents`
 
 ## Readings
-Recommended Readings : Please add!
-need to know : Socket, Thread, I/O, 
-  + Non-blocking File I/O : 
-    * https://en.wikipedia.org/wiki/Non-blocking_I/O_(Java)
-    * http://tutorials.jenkov.com/java-nio/index.html
-  + IO
-    * http://tutorials.jenkov.com/java-io/index.html
+Refer to Issue #1
 
 [comment]: asdf
 
-## Summary?
+## TODOs : tentative
+* Step 1
+  - ~~implementing basic server-client model~~
+  - ~~Event Queue~~
+  - HTTP parser : until 10/22
+* Step 2
+  - Event definition : until 10/24
+  - HTTP response composition
+  - Main server execution?
+  - Event Loop Implementation
+* Step 3
+  - Cacheing
+  - Benchmark
 
-### Java NIO 
-* currently reading overview
-- Channel & Buffer : Data is always read from a channel into a buffer, or written from a buffer to a channel
-- Selector : A selector is an object that can monitor multiple channels for events (like: connection opened, data arrived etc.). Thus, a single thread can monitor multiple channels for data. [Role of Event Queue?]
+## Summary
+
+<!--### Java NIO -->
+<!--* currently reading overview-->
+<!--- Channel & Buffer : Data is always read from a channel into a buffer, or written from a buffer to a channel-->
+<!--- Selector : A selector is an object that can monitor multiple channels for events (like: connection opened, data arrived etc.). Thus, a single thread can monitor multiple channels for data. [Role of Event Queue?]-->
