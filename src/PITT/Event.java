@@ -16,20 +16,24 @@ public class Event {
   String[] headers;
   String[] body;
 
-  boolean parse_error;//error code?
+  int code;//error code?
 
-  public Event(String method, String uri, String http_version, String[] headers, String[] body){
+  public Event(String method, String uri, String http_version, String[] headers, String[] body, int code){
     this.method = method;
     this.uri = uri;
     this.http_version = http_version;
     this.headers = headers;
     this.body = body;
 
-    parse_error = false;
+    this.code = code;
   }
 
   public Event(){
-    parse_error = true;
+    code = 400;//bad request
+  }
+
+  public Event(int code){
+    this.code = code;
   }
 
 

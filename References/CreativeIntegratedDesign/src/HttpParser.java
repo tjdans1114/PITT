@@ -25,12 +25,14 @@ public class HttpParser {
 			for (String header : headerInfo) {
 				if (header.contains("Connection")) {
 					connection = header.split(" ")[1];
-				} else if (header.contains("If-Modified-Since")) {
+				}
+				else if (header.contains("If-Modified-Since")) {
 					String[] headerList = header.split(" ");
 					if (headerList.length > 2){
 						ModifiedSince = headerList[1] + " " + headerList[2];
 					}
-				} else if (header.contains("Range")) {
+				}
+				else if (header.contains("Range")) {
 					String[] rangeList = header.split(" ")[1].split("=")[1].split("-");
 					if (rangeList.length > 1) {
 						Range[0] = Integer.parseInt(rangeList[0]);
