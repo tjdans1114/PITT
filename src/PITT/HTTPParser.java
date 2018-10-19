@@ -22,8 +22,30 @@ public class HTTPParser {
   */
 
   public Event parse(String request){
-    //TODO
-    return null;
-  }
+    final String space = " ";
+    try{
+      String[] tokens = request.split(Event.crlf);
 
+      /* 1. parse first line : method ,uri, http_version */
+      String first_line = tokens[0];
+      String[] parsed_first_line = first_line.split(space);
+      if(parsed_first_line.length != 3){
+        throw new Exception("HTTP request parse failed : first line segment not size 3")
+      }
+
+
+
+
+
+
+
+
+      return new Event("method","uri","http_version",new String[1],new String[1]);
+    }
+    catch(Exception ex){
+      ex.printStackTrace();
+
+      return new Event();
+    }
+  }
 }
