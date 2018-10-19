@@ -9,8 +9,6 @@ watch `/Documents`
 ## Readings
 Refer to Issue #1
 
-[comment]: asdf
-
 ## TODOs : tentative
 * Step 1
   - ~~implementing basic server-client model~~

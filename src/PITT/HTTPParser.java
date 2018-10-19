@@ -28,7 +28,8 @@ public class HTTPParser {
   String[] supported_headers = {
           "Connection",
           "Range", //for streaming?
-          "If-Modified-Since" //for cacheing?
+          "If-Modified-Since", //for cacheing?
+          //TODO : determine which headers are to be implemented
   };
 
   private boolean is_supported_method(String m){
@@ -68,14 +69,17 @@ public class HTTPParser {
         String header = tokens[i];
 
         //TODO
+        if(header.startsWith("Connection")){
+          //TODO
+          continue;
+        }
+        if(true){
+          continue;
+        }
       }
-
 
       /* 3. body ?  */
       //???
-
-
-
 
 
 
