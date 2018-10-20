@@ -1,5 +1,8 @@
 package PITT;
 
+import java.util.*;
+import java.io.*;
+
 public class HTTPParser {
   /*
   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages for detail
@@ -25,12 +28,13 @@ public class HTTPParser {
   * Data...? [Body]
   */
   String[] supported_methods = {"GET","POST"};
-  String[] supported_headers = {
-          "Connection",
-          "Range", //for streaming?
-          "If-Modified-Since", //for cacheing?
-          //TODO : determine which headers are to be implemented
-  };
+
+//  String[] supported_headers = {
+//          "Connection",
+//          "Range", //for streaming?
+//          "If-Modified-Since", //for cacheing?
+//          //TODO : determine which headers are to be implemented
+//  };
 
   private boolean is_supported_method(String m){
     for(String s : supported_methods){
@@ -41,16 +45,19 @@ public class HTTPParser {
     return false;
   }
 
-
+  //this is just a parser...
   public Event parse(String request){
     final String space = " ";
 
     String method, uri, http_version;
+    TreeMap<String,String> header_map = new TreeMap<String,String>();
+    StringBuffer body= new StringBuffer();
+
     try{
-      String[] tokens = request.split(Event.crlf);
+      BufferedReader reader = new BufferedReader(new StringReader(request));
 
       /* 1. parse first line : method ,uri, http_version */
-      String first_line = tokens[0];
+      String first_line = reader.readLine();
       String[] parsed_first_line = first_line.split(space);
       if(parsed_first_line.length != 3){
         throw new Exception("HTTP request parse failed : first line segment not size 3");
@@ -64,27 +71,36 @@ public class HTTPParser {
       }
 
       /* 2. headers : general, request, entity */
-      //???
-      for(int i=1;i<tokens.length;i++){
-        String header = tokens[i];
+      while(true){
+        String header_line = reader.readLine();
+        if(header_line.length() == 0){
+          break;
+        }
 
-        //TODO
-        if(header.startsWith("Connection")){
-          //TODO
-          continue;
+        //header line is parsed by colon
+        int colon_index = header_line.indexOf(':');
+        if(colon_index == -1){
+          throw new Exception("HTTP request parse failed : header line doesn't contain colon");
         }
-        if(true){
-          continue;
+
+        String header_name = header_line.substring(0,colon_index);
+        String header_content = header_line.substring(colon_index+1,header_line.length());
+        header_map.put(header_name,header_content);
+      }
+      //deal with unsupported headers...?
+
+
+      /* 3. body : now, the rest part is all body  */
+      while(true){
+        String body_line = reader.readLine();
+        if(body_line == null){
+          break;//end of request
         }
+
+        body.append(body_line).append(Event.crlf);
       }
 
-      /* 3. body ?  */
-      //???
-
-
-
-
-      return new Event(method,uri,http_version,new String[1],new String[1], 200);
+      return new Event(method,uri,http_version,header_map,body, 200);
     }
     catch(Exception ex){
       ex.printStackTrace();

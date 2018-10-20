@@ -1,5 +1,7 @@
 package PITT;
 
+import java.util.*;
+
 public class Event {
   /*
   * Event :
@@ -10,31 +12,33 @@ public class Event {
   *
   */
   static final String crlf = "\r\n";
+  /*
+    \r = CR (Carriage Return) // Used as a new line character in Mac OS before X
+    \n = LF (Line Feed) // Used as a new line character in Unix/Mac OS X
+    \r\n = CR + LF // Used as a new line character in Windows
+  */
 
   String method, uri, http_version;//first line
   //String mime; //principal headers
-  String[] headers;
-  String[] body;
+  Map<String,String> header_map;
+  StringBuffer body;
 
-  int code;//error code?
+  int error_code;
 
-  public Event(String method, String uri, String http_version, String[] headers, String[] body, int code){
+  public Event(String method, String uri, String http_version, Map<String,String> header_map, StringBuffer body, int error_code){
     this.method = method;
     this.uri = uri;
     this.http_version = http_version;
-    this.headers = headers;
+    this.header_map = header_map;
     this.body = body;
 
-    this.code = code;
+    this.error_code = error_code;
   }
 
-  public Event(){
-    code = 400;//bad request
+  public Event(int error_code){
+    this.error_code = error_code;
   }
-
-  public Event(int code){
-    this.code = code;
-  }
+  //400, 501, ...
 
 
 }
