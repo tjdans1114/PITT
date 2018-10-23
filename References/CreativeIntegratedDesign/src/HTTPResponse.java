@@ -33,7 +33,7 @@ public class HTTPResponse {
 				"/" + String.valueOf(event.size) + "\n" + "Last-Modified: " + event.LastModified;
 		ByteBuffer headerBuf = Charset.forName("UTF-8").encode(firstLine + header + "\r\n" + "\r\n");
 		content.rewind();
-//		int size = content.limit() + headerBuf.limit();
+		//int size = content.limit() + headerBuf.limit();
 		//ByteBuffer result = ByteBuffer.allocate(size).put(headerBuf).put(content);
 		return new ByteBuffer[] {headerBuf, content};
 	}
