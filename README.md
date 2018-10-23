@@ -13,9 +13,9 @@ Refer to Issue #1
 * Step 1
   - ~~implementing basic server-client model~~
   - ~~Event Queue~~
-  - HTTP parser : until 10/22
+  - ~~HTTP parser : until 10/22~~
 * Step 2
-  - Event definition : until 10/24
+  - Event definition : ~~until 10/24~~ future works necessary
   - HTTP response composition
   - Main server execution?
   - Event Loop Implementation
