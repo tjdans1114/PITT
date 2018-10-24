@@ -4,14 +4,16 @@ import java.nio.*;
 
 public class HTTPResponse {
   //TODO : interpret parsed Event
-  ByteBuffer[] respond(Event http_request){
+  public ByteBuffer[] respond(Event http_request){
+    String http_version = "HTTP/1.1";
+
     ByteBuffer header_buffer = ByteBuffer.allocate(4096);//capacity
     ByteBuffer body_buffer = ByteBuffer.allocate(4096);//capacity
 
     /* case : parse error occurred */
     if(http_request.error_code != 200){
       //error handling
-      String http_version = "HTTP/1.1";
+
       int status_code = http_request.error_code;
       String status_str = Global.http_status_map.get(status_code);
 
@@ -43,7 +45,7 @@ public class HTTPResponse {
     }
 
     /* parser error code 200 */
-    String http_version = "HTTP/1.1";
+    
     int status_code = 404; //TODO
 
     //TODO : study how to use ByteBuffer!!!!!!!

@@ -46,7 +46,7 @@ public class HTTPParser {
   }
 
   //this is just a parser...
-  public Event parse(String request){
+  public HTTPEvent parse(String request){
     final String space = " ";
 
     String method, uri, http_version;
@@ -56,7 +56,7 @@ public class HTTPParser {
     try{
       BufferedReader reader = new BufferedReader(new StringReader(request));
 
-      /* 1. parse first line : method ,uri, http_version */
+      /** 1. parse first line : method ,uri, http_version */
       String first_line = reader.readLine();
       String[] parsed_first_line = first_line.split(space);
       if(parsed_first_line.length != 3){
@@ -67,13 +67,13 @@ public class HTTPParser {
       http_version = parsed_first_line[2];
 
       if(!is_supported_method(method)){//unsupported method : 501
-        return new Event(501);
+        return new HTTPEvent(501);
       }
       if(http_version != "HTTP/1.1"){
-        return new Event(505);
+        return new HTTPEvent(505);
       }
 
-      /* 2. headers : general, request, entity */
+      /** 2. headers : general, request, entity */
       while(true){
         String header_line = reader.readLine();
         if(header_line.length() == 0){
@@ -93,7 +93,7 @@ public class HTTPParser {
       //deal with unsupported headers...?
 
 
-      /* 3. body : now, the rest part is all body  */
+      /** 3. body : now, the rest part is all body  */
       while(true){
         String body_line = reader.readLine();
         if(body_line == null){
@@ -103,12 +103,12 @@ public class HTTPParser {
         body.append(body_line).append(Event.crlf);
       }
 
-      return new Event(method,uri,http_version,header_map,body, 200);
+      return new HTTPEvent(method,uri,http_version,header_map,body, 200);
     }
     catch(Exception ex){
       ex.printStackTrace();
 
-      return new Event(400);//bad request
+      return new HTTPEvent(400);//bad request
     }
   }
 }
