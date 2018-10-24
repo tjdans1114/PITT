@@ -69,6 +69,9 @@ public class HTTPParser {
       if(!is_supported_method(method)){//unsupported method : 501
         return new Event(501);
       }
+      if(http_version != "HTTP/1.1"){
+        return new Event(505);
+      }
 
       /* 2. headers : general, request, entity */
       while(true){
