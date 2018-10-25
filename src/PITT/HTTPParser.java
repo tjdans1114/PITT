@@ -27,7 +27,7 @@ public class HTTPParser {
   *       (blank line : delimiter between Headers / Body]
   * Data...? [Body]
   */
-  String[] supported_methods = {"GET","POST"};
+  private static String[] supported_methods = {"GET","POST"};
 
 //  String[] supported_headers = {
 //          "Connection",
@@ -36,7 +36,7 @@ public class HTTPParser {
 //          //TODO : determine which headers are to be implemented
 //  };
 
-  private boolean is_supported_method(String m){
+  private static boolean is_supported_method(String m){
     for(String s : supported_methods){
       if(m.equals(s)){
         return true;
@@ -46,7 +46,7 @@ public class HTTPParser {
   }
 
   //this is just a parser...
-  public HTTPEvent parse(String request){
+  public static HTTPEvent parse(String request){
     final String space = " ";
 
     String method, uri, http_version;
@@ -92,16 +92,17 @@ public class HTTPParser {
       }
       //deal with unsupported headers...?
 
-
       /** 3. body : now, the rest part is all body  */
       while(true){
         String body_line = reader.readLine();
-        if(body_line == null){
+        if(body_line == null){//??
           break;//end of request
         }
 
         body.append(body_line).append(Event.crlf);
       }
+
+      //preprocessing more?
 
       return new HTTPEvent(method,uri,http_version,header_map,body, 200);
     }

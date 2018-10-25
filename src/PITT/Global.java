@@ -17,7 +17,7 @@ public class Global {
       put(103,"Early Hints");
 
       //2xx Success
-      put(200,"OK"); //TODO : basic
+      put(200,"OK"); //TODO : basic 
       put(201,"Created");
       put(202,"Accepted");
       put(203,"Non-Authoritative Information");

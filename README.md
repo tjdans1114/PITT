@@ -9,6 +9,8 @@ watch `/Documents`
 ## Readings
 Refer to Issue #1
 
+Need to study Thread...
+
 ## TODOs : tentative
 * Step 1
   - ~~implementing basic server-client model~~
@@ -17,15 +19,21 @@ Refer to Issue #1
 * Step 2
   - Event definition : ~~until 10/24~~ future works necessary
   - HTTP response composition
-  - Main server execution?
   - Event Loop Implementation
+  - Main server execution?
 * Step 3
   - Cacheing
   - Benchmark
 
 ## Summary
-
-<!--### Java NIO -->
-<!--* currently reading overview-->
-<!--- Channel & Buffer : Data is always read from a channel into a buffer, or written from a buffer to a channel-->
-<!--- Selector : A selector is an object that can monitor multiple channels for events (like: connection opened, data arrived etc.). Thus, a single thread can monitor multiple channels for data. [Role of Event Queue?]-->
+Event : HTTPEvent or IOEvent
+HTTPParser : parse string into HTTPEvent
+HTTPResponse : interpret parsed HTTP Request & return HTTP Response
+  * if HTTP req entails I/O, return (I/O continuation)(???)
+  * else return HTTP Response
+EventLoop : Event Loop Architecture. exploits HTTPParser, HTTPResponse
+  * 요 부분을 어떻게 구성할지? 잘 모르겟음
+  * if dequeued HTTP Event
+    - if HTTPResponse returns normal resp, then write that to socket.
+    - else (if returns IO continuation), enqueue that to the Queue
+  * if dequeued IO Event,
