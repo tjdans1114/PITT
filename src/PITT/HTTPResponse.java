@@ -4,7 +4,7 @@ import java.nio.*;
 
 public class HTTPResponse {
   //TODO : interpret parsed Event
-  public ByteBuffer[] respond(HTTPEvent http_request){
+  public ByteBuffer[] respond(Event http_request){
     String http_version = "HTTP/1.1";
 
     ByteBuffer header_buffer = ByteBuffer.allocate(4096);//capacity

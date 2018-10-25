@@ -2,6 +2,7 @@ package PITT;
 
 import java.util.*;
 import java.io.*;
+import java.nio.channels.SocketChannel;
 
 public class HTTPParser {
   /*
@@ -46,7 +47,7 @@ public class HTTPParser {
   }
 
   //this is just a parser...
-  public static HTTPEvent parse(String request){
+  public static Event parse(String request, SocketChannel client){
     final String space = " ";
 
     String method, uri, http_version;
@@ -67,10 +68,10 @@ public class HTTPParser {
       http_version = parsed_first_line[2];
 
       if(!is_supported_method(method)){//unsupported method : 501
-        return new HTTPEvent(501);
+        return new Event(501);
       }
       if(http_version != "HTTP/1.1"){
-        return new HTTPEvent(505);
+        return new Event(505);
       }
 
       /** 2. headers : general, request, entity */
@@ -102,14 +103,18 @@ public class HTTPParser {
         body.append(body_line).append(Event.crlf);
       }
 
-      //preprocessing more?
+      /** 4. further preprocessing */
+      //TODO determine type : NON_IO or IO
+      Event.Type type = (method.equals("GET") && uri.endsWith(".jpg"))
+              ? Event.Type.NON_IO
+              : Event.Type.IO;
 
-      return new HTTPEvent(method,uri,http_version,header_map,body, 200);
+      return new Event(client, type,method,uri,http_version,header_map,body, 200);
     }
     catch(Exception ex){
       ex.printStackTrace();
 
-      return new HTTPEvent(400);//bad request
+      return new Event(400);//bad request
     }
   }
 }

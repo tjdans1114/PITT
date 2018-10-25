@@ -17,23 +17,28 @@ Need to study Thread...
   - ~~Event Queue~~
   - ~~HTTP parser : until 10/22~~
 * Step 2
-  - Event definition : ~~until 10/24~~ future works necessary
-  - HTTP response composition
+  - ~~Event definition: until 10/24~~
+  - HTTP response composition & Interpreter
   - Event Loop Implementation
   - Main server execution?
 * Step 3
   - Cacheing
   - Benchmark
 
+## Implementation TODO
+
 ## Summary
-1. Event : HTTPEvent or IOEvent
-2. HTTPParser : parse string into HTTPEvent
-3. HTTPResponse : interpret parsed HTTP Request & return HTTP Response
-  * if HTTP req entails I/O, return (I/O continuation)(???)
-  * else return HTTP Response
-4. EventLoop : Event Loop Architecture. exploits HTTPParser, HTTPResponse
-  * 요 부분을 어떻게 구성할지? 잘 모르겟음
-  * if dequeued HTTP Event
-    - if HTTPResponse returns normal resp, then write that to socket.
-    - else (if returns IO continuation), enqueue that to the Queue
-  * if dequeued IO Event,
+* `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`
+* `Event` : `IO` or `NON_IO`.
+* HTTPResponse : interpret parsed HTTP Request & return HTTP Response
+  - contained in main thread, and supplementary Thread Pool
+  - return HTTP Response to the client
+
+* `EventLoop` : Event Loop Architecture. exploits `HTTPParser`, `HTTPResponse`
+  - contains EventQueue.
+    + EventQueue : simple Non-blocking Queue (ADT) that contains `Event`
+  - if dequeued NON_IO `Event`
+    + dispatch the Event to the Thread Pool (Worker Thread).
+    + HTTP Response is returned to client by Worker Thread.
+  - if dequeued IO `Event`,
+    + main thread processes HTTP Response to the client.
