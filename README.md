@@ -26,12 +26,12 @@ Need to study Thread...
   - Benchmark
 
 ## Summary
-Event : HTTPEvent or IOEvent
-HTTPParser : parse string into HTTPEvent
-HTTPResponse : interpret parsed HTTP Request & return HTTP Response
+1. Event : HTTPEvent or IOEvent
+2. HTTPParser : parse string into HTTPEvent
+3. HTTPResponse : interpret parsed HTTP Request & return HTTP Response
   * if HTTP req entails I/O, return (I/O continuation)(???)
   * else return HTTP Response
-EventLoop : Event Loop Architecture. exploits HTTPParser, HTTPResponse
+4. EventLoop : Event Loop Architecture. exploits HTTPParser, HTTPResponse
   * 요 부분을 어떻게 구성할지? 잘 모르겟음
   * if dequeued HTTP Event
     - if HTTPResponse returns normal resp, then write that to socket.
