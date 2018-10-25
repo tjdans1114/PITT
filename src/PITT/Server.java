@@ -14,7 +14,7 @@ public class Server{
 
     //socket : selectable channel for stream-oriented listening sockets
     ServerSocketChannel socket = ServerSocketChannel.open();
-    InetSocketAddress address = new InetSocketAddress("localhost",1111);
+    InetSocketAddress address = new InetSocketAddress("localhost",Global.PORT);
     // Binds the channel's socket to a local address and configures the socket to listen for connections
     socket.bind(address);
     socket.configureBlocking(false);//configure : Non-Blocking

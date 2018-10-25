@@ -39,77 +39,77 @@ public class Main {
 		String ip = "127.0.0.1";
 		
 		
-			selector = Selector.open();
-			serverSocketChannel = ServerSocketChannel.open();
-			
-			serverSocketChannel.configureBlocking(false);
-			
-			serverSocket = serverSocketChannel.socket();
-			serverSocket.bind(new InetSocketAddress(ip, port));
-			
-			serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-			
-			System.out.println("Server Socket opening....");
-			
-			eventLoop.start();
-			int i = 1;
-			
-			while (true) {
-				try {
-					selector.select();
-					Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
-					
-					while (iterator.hasNext()) {
-						SelectionKey key = (SelectionKey) iterator.next();
-						try {
-							if (key.isAcceptable()) {
-								client = ((ServerSocketChannel)key.channel()).accept();
-								if (client != null) {
-									client.configureBlocking(false);
-									client.register(selector, SelectionKey.OP_READ);
-									//System.out.printf("%d: Client %s connected\n", i, client.toString());
-									i++;
-									//run(client);
-								}
+		selector = Selector.open();
+		serverSocketChannel = ServerSocketChannel.open();
+
+		serverSocketChannel.configureBlocking(false);
+
+		serverSocket = serverSocketChannel.socket();
+		serverSocket.bind(new InetSocketAddress(ip, port));
+
+		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+		System.out.println("Server Socket opening....");
+
+		eventLoop.start();
+		int i = 1;
+
+		while (true) {
+			try {
+				selector.select();
+				Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
+
+				while (iterator.hasNext()) {
+					SelectionKey key = (SelectionKey) iterator.next();
+					try {
+						if (key.isAcceptable()) {
+							client = ((ServerSocketChannel)key.channel()).accept();
+							if (client != null) {
+								client.configureBlocking(false);
+								client.register(selector, SelectionKey.OP_READ);
+								//System.out.printf("%d: Client %s connected\n", i, client.toString());
+								i++;
+								//run(client);
 							}
-							else if (key.isReadable()) {
-								//System.out.println("READ");
-								client = (SocketChannel) key.channel();
-								run(client, key);
+						}
+						else if (key.isReadable()) {
+							//System.out.println("READ");
+							client = (SocketChannel) key.channel();
+							run(client, key);
+						}
+						else if (key.isWritable()) {
+							Event event = (Event) key.attachment();
+							ByteBuffer[] data = event.response_data;
+							long position = data[0].position() + data[1].position();
+							long size = data[0].limit() + data[1].limit();
+							long data_size = event.socket.write(data);
+							//System.out.println(position);
+							//System.out.println(size);
+							//System.out.println(data_size);
+							if (position == size) {
+								//System.out.println("WRITINGaa");
+								key.interestOps(SelectionKey.OP_READ);
+								key.attach(null);
+								eventLoop.connection(event);
+							} else {
+								//System.out.println("WRITE");
+								//System.out.println(data[1].position());
 							}
-							else if (key.isWritable()) {
-								Event event = (Event) key.attachment();
-								ByteBuffer[] data = event.response_data;
-								long position = data[0].position() + data[1].position();
-								long size = data[0].limit() + data[1].limit();
-								long data_size = event.socket.write(data);
-								//System.out.println(position);
-								//System.out.println(size);
-								//System.out.println(data_size);
-								if (position == size) {
-									//System.out.println("WRITINGaa");
-									key.interestOps(SelectionKey.OP_READ);
-									key.attach(null);
-									eventLoop.connection(event);	
-								} else {
-									//System.out.println("WRITE");
-									//System.out.println(data[1].position());
-								}
-							}
-						} catch (Exception e) {
-							//e.printStackTrace();
-							//System.out.println("Key Cancelled");
-							//System.out.println(e.toString());
-							key.cancel();
-							key.channel().close();
-						}	
+						}
+					} catch (Exception e) {
+						//e.printStackTrace();
+						//System.out.println("Key Cancelled");
+						//System.out.println(e.toString());
+						key.cancel();
+						key.channel().close();
 					}
-					iterator.remove();					
-				} catch (Exception e) {
-					//e.printStackTrace();
-					//System.out.println("Cannot remove iter");
 				}
+				iterator.remove();
+			} catch (Exception e) {
+				//e.printStackTrace();
+				//System.out.println("Cannot remove iter");
 			}
+		}
 		
 	}
 	

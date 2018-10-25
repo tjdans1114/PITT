@@ -8,6 +8,8 @@ public class HTTPEvent extends Event {
   }
 
   public HTTPEvent(String method, String uri, String http_version, Map<String,String> header_map, StringBuffer body, int error_code){
+    this.type = Event.Type.HTTP;
+
     this.method = method;
     this.uri = uri;
     this.http_version = http_version;
@@ -18,6 +20,8 @@ public class HTTPEvent extends Event {
   }
 
   public HTTPEvent(int error_code){
+    this.type = Event.Type.HTTP;
+
     this.error_code = error_code;
   }
 }

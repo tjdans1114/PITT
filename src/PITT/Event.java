@@ -16,7 +16,6 @@ public abstract class Event {
   protected Type type;
 
   protected String method, uri, http_version;//first line
-  //String mime; //principal headers
   protected Map<String,String> header_map;
   protected StringBuffer body;
 
