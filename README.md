@@ -26,6 +26,20 @@ Need to study Thread...
   - Benchmark
 
 ## Implementation TODO
+  * interpret가 끝나면 socket 을 writable로 바꿔줘야함
+
+## Remark
+  * Read Request : from client socket
+  * Parse Request : HTTPParser
+  * Find Resource : for file request, (In Thread?), determine location of the resource
+  * Read File : in Thread, File IO
+  * Make Response : after interpreting request, construct response
+  * Write Response : HTTP Response to client socket?
+
+## 연구원님 질문거리
+  * (file) IO 와 non-IO 를 어떻게 구분할 것인가?
+  * Thread에서 client socket으로 (directly) response를 날릴 수 있는가?
+  * Threading을 어떻게 하는지???
 
 ## Summary
 * `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`

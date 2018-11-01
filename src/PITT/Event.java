@@ -14,6 +14,7 @@ public class Event {
   */
 
   public SocketChannel client;
+  public SelectionKey key;
 
   public enum Type{
     UNDEFINED, NON_IO, IO;
@@ -33,8 +34,12 @@ public class Event {
     \r\n = CR + LF // Used as a new line character in Windows
   */
 
-  public Event(SocketChannel client, Type type, String method, String uri, String http_version, Map<String,String> header_map, StringBuffer body, int error_code){
+  public Event(SocketChannel client, SelectionKey key,
+               Type type, String method, String uri, String http_version,
+               Map<String,String> header_map, StringBuffer body,
+               int error_code){
     this.client = client;
+    this.key = key;
     this.type = type;
 
     this.method = method;
@@ -46,12 +51,10 @@ public class Event {
     this.error_code = error_code;
   }
 
-  public Event(int error_code){
+  public Event(SocketChannel client, SelectionKey key,
+               int error_code){
     this.type = Event.Type.NON_IO;
 
     this.error_code = error_code;
   }
-  public Event(){
-    this(400);
-  } // unnecessary?
 }

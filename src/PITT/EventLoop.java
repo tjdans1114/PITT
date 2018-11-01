@@ -13,10 +13,14 @@ public class EventLoop {
 
 
 
+
+
   //File jobs required
 
   public void run(){
     //TODO : implement Loop architecture
+
+    //if io, look for the cache then do the io-job
   }
 
   //TODO : future works : Cacheing

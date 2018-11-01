@@ -3,6 +3,7 @@ package PITT;
 import java.util.*;
 
 public class Global {
+  public static final String IP = "127.0.0.1"; //localhost
   public static final int PORT = 1111;
 
   public static final Map<Integer, String> http_status_map  = new TreeMap<Integer,String>(){
