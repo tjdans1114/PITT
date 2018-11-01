@@ -53,6 +53,8 @@ public class Event {
 
   public Event(SocketChannel client, SelectionKey key,
                int error_code){
+    this.client = client;
+    this.key = key;
     this.type = Event.Type.NON_IO;
 
     this.error_code = error_code;

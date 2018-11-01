@@ -29,4 +29,20 @@ public class Response {
     this.header_map = header_map;
     this.body = body;
   }
+
+  ByteBuffer get_message(){
+    ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+
+    buffer.put(http_version.getBytes());
+    buffer.put((byte) status_code);
+    buffer.put(status_message.getBytes());
+
+    for(String s : header_map.keySet()){
+      buffer.put((s+": "+header_map.get(s)).getBytes());
+    }
+
+    buffer.put(body.toString().getBytes());
+
+    return buffer;
+  }
 }

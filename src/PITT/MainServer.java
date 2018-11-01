@@ -73,8 +73,8 @@ public class MainServer {
 
           //write response
           SocketChannel client = response.client;
-          ByteBuffer response_data = null; //TODO
-          long data_size = client.write(response_data); // debugging required
+          ByteBuffer response_data = response.get_message();
+          int data_size = client.write(response_data); // debugging required
 
           // retrieve response
         }
