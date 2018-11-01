@@ -10,7 +10,7 @@ public class Event {
   * 1. NON_IO Event : HTTP Request that does not entail File I/O. should be processed in main thread
   * 2. IO Event : HTTP Request that entails File I/O. should be processed in Thread Pool.
   *
-  * Note that each thread(including main) has its own HTTP Interpreter (HTTPResponse)
+  * Note that each thread(including main) has its own HTTP Interpreter (HTTPInterpreter)
   */
 
   public SocketChannel client;

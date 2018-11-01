@@ -44,11 +44,11 @@ Need to study Thread...
 ## Summary
 * `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`
 * `Event` : `IO` or `NON_IO`.
-* HTTPResponse : interpret parsed HTTP Request & return HTTP Response
+* HTTPInterpreter : interpret parsed HTTP Request & return HTTP Response
   - contained in main thread, and supplementary Thread Pool
   - return HTTP Response to the client
 
-* `EventLoop` : Event Loop Architecture. exploits `HTTPParser`, `HTTPResponse`
+* `EventLoop` : Event Loop Architecture. exploits `HTTPParser`, `HTTPInterpreter`
   - contains EventQueue.
     + EventQueue : simple Non-blocking Queue (ADT) that contains `Event`
   - if dequeued NON_IO `Event`
