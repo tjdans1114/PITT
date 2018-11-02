@@ -18,15 +18,25 @@ Need to study Thread...
   - ~~HTTP parser : until 10/22~~
 * Step 2
   - ~~Event definition: until 10/24~~
-  - HTTP response composition & Interpreter
-  - Event Loop Implementation
-  - Main server execution?
+  - Event Loop Implementation : until 11/9
+  - HTTP response composition & Interpreter : until 11/16
+  - Main server execution? : until 11/23
+  - debugging : until 11/30
 * Step 3
-  - Cacheing
-  - Benchmark
+  - Cacheing : until 11/30?
+  - Benchmark : until 12/??
 
 ## Implementation TODO
   * interpret가 끝나면 socket 을 writable로 바꿔줘야함
+  * Event의 구성 :
+    * unprocessed
+      * NON_IO : 바로 return 해줄 수 있는 것
+      * IO : 바로 return 해줄 수 없는 것
+    * on process :
+      * CONTINUATION
+    * finished
+      * FINISHED
+
 
 ## Remark
   * Read Request : from client socket
