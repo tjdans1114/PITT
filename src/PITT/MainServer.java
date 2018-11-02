@@ -76,6 +76,8 @@ public class MainServer {
           ByteBuffer response_data = response.get_message();
           int data_size = client.write(response_data); // debugging required
 
+
+
           // retrieve response
         }
         key_iterator.remove();//remove current key

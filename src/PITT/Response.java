@@ -12,8 +12,10 @@ public class Response {
   int status_code;
   String status_message;
 
-  TreeMap<String,String> header_map = new TreeMap<String,String>();
-  StringBuffer body= new StringBuffer();
+  TreeMap<String,String> header_map;
+  StringBuffer body;
+
+  Event continuation;
 
   //constructor
   public Response(SocketChannel client, SelectionKey key,

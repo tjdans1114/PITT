@@ -50,9 +50,17 @@ public class HTTPInterpreter {
     header_map.put("Connection","keep-alive");
 
     //process body
-    body.append(
-      "Not Implemented yet sorry..."
-    );
+    if(Cache.has(http_request.uri)){
+      status_code = 206;
+      body.append(
+              Cache.get(http_request.uri)
+      );
+    }
+    else{
+      body.append(
+              "Not Implemented yet sorry..."
+      );
+    }
 
     return new Response(client,key,http_version,status_code,header_map,body);
   }

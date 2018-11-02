@@ -17,7 +17,7 @@ public class Event {
   public SelectionKey key;
 
   public enum Type{
-    UNDEFINED, NON_IO, IO;
+    UNDEFINED, NON_IO, IO, CONTINUATION, FINISHED;
   }
   public Type type;
 
@@ -26,6 +26,9 @@ public class Event {
   public StringBuffer body;
 
   int error_code;
+
+  Object data; //entailed open bytebuffer : for continuation (partial content)
+  int start, end; // position of data
 
   static final String crlf = "\r\n";
   /*
@@ -51,6 +54,7 @@ public class Event {
     this.error_code = error_code;
   }
 
+    //for processing error messages
   public Event(SocketChannel client, SelectionKey key,
                int error_code){
     this.client = client;
