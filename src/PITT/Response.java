@@ -13,14 +13,14 @@ public class Response {
   String status_message;
 
   TreeMap<String,String> header_map;
-  StringBuffer body;
+  ByteBuffer body;
 
   Event continuation;
 
   //constructor
   public Response(SocketChannel client, SelectionKey key,
                   String http_version, int status_code,
-                  TreeMap<String,String> header_map, StringBuffer body){
+                  TreeMap<String,String> header_map, ByteBuffer body){
     this.client = client;
     this.key = key;
 
@@ -43,7 +43,7 @@ public class Response {
       buffer.put((s+": "+header_map.get(s)).getBytes());
     }
 
-    buffer.put(body.toString().getBytes());
+    buffer.put(body);
 
     return buffer;
   }

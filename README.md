@@ -27,6 +27,7 @@ Need to study Thread...
   - Benchmark : until 12/??
 
 ## Implementation TODO
+  * request parsing도 여러 step에 거쳐서 할 수 있게...
   * interpret가 끝나면 socket 을 writable로 바꿔줘야함
   * Event의 구성 :
     * unprocessed
@@ -48,8 +49,8 @@ Need to study Thread...
 
 ## 연구원님 질문거리
   * (file) IO 와 non-IO 를 어떻게 구분할 것인가?
-  * Thread에서 client socket으로 (directly) response를 날릴 수 있는가?
-  * Threading을 어떻게 하는지???
+  * ~~Thread에서 client socket으로 (directly) response를 날릴 수 있는가?~~
+  * ~~Threading을 어떻게 하는지???~~
 
 ## Summary
 * `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`
@@ -66,3 +67,6 @@ Need to study Thread...
     + HTTP Response is returned to client by Worker Thread.
   - if dequeued IO `Event`,
     + main thread processes HTTP Response to the client.
+
+## Remark
+  * DMA : file이 커야 효율 나옴

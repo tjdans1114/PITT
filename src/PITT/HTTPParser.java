@@ -61,7 +61,7 @@ public class HTTPParser {
       String first_line = reader.readLine();
       String[] parsed_first_line = first_line.split(space);
       if(parsed_first_line.length != 3){
-        throw new Exception("HTTP request parse failed : first line segment not size 3");
+        return new Event(client, key, 400);
       }
       method = parsed_first_line[0];
       uri = parsed_first_line[1];
@@ -84,7 +84,7 @@ public class HTTPParser {
         //header line is parsed by colon
         int colon_index = header_line.indexOf(':');
         if(colon_index == -1){
-          throw new Exception("HTTP request parse failed : header line doesn't contain colon");
+          return new Event(client, key, 400);
         }
 
         String header_name = header_line.substring(0,colon_index);
@@ -104,13 +104,10 @@ public class HTTPParser {
       }
 
       /** 4. further preprocessing */
-      //TODO determine type : NON_IO or IO
-//      Event.Type type = (method.equals("GET") && uri.endsWith(".jpg"))
-//              ? Event.Type.NON_IO
-//              : Event.Type.IO;
-      Event.Type type = Event.Type.IO;
-
-      return new Event(client, key, type,method,uri,http_version,header_map,body, 200);
+      return new Event(
+              client, key, Event.Type.IO,
+              method,uri,http_version,
+              header_map,body, 200);
     }
     catch(Exception ex){
       ex.printStackTrace();
