@@ -47,10 +47,16 @@ Need to study Thread...
   * Make Response : after interpreting request, construct response
   * Write Response : HTTP Response to client socket?
 
-## 연구원님 질문거리
-  * (file) IO 와 non-IO 를 어떻게 구분할 것인가?
-  * ~~Thread에서 client socket으로 (directly) response를 날릴 수 있는가?~~
-  * ~~Threading을 어떻게 하는지???~~
+## FLOW
+in main(event loop),
+if readable : parse string. enqueue that into event
+if writable : ???
+dequeued event case, run HTTPInterpreter. create_response -> respond : socket.write occurs in respond
+NON_IO : direct response message return!
+IO : open file, etc... then response message. may result in continuation
+continuation : file is already open. just write body message. may result in another continuation
+finished : done. nothing to process more
+
 
 ## Summary
 * `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`

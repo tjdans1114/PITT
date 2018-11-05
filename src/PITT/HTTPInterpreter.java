@@ -6,14 +6,14 @@ import java.util.TreeMap;
 
 public class HTTPInterpreter {
   //TODO : interpret parsed Event
-  public Response respond(Event http_request){
+  public Response create_response(Event http_request){
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
 
     String http_version = "HTTP/1.1";
     int status_code;
     TreeMap<String,String> header_map = new TreeMap<String,String>();
-    StringBuffer body = new StringBuffer();
+    ByteBuffer body = ByteBuffer.allocate(0);
 
     /* case : parse error occurred */
     if(http_request.error_code != 200){
@@ -24,7 +24,7 @@ public class HTTPInterpreter {
       //first line + header
       header_map.put("a","b");
 
-      body.append(
+      body.put((
         "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
         "<html>\n" +
         "\n" +
@@ -38,7 +38,7 @@ public class HTTPInterpreter {
         "</body>\n" +
         "\n" +
         "</html>"
-      );
+      ).getBytes());
 
       return new Response(client,key,http_version,status_code,header_map,body);
     }
@@ -52,16 +52,23 @@ public class HTTPInterpreter {
     //process body
     if(Cache.has(http_request.uri)){
       status_code = 206;
-      body.append(
+      body.put(
               Cache.get(http_request.uri)
       );
     }
     else{
-      body.append(
-              "Not Implemented yet sorry..."
+      body.put(
+              ("Not Implemented yet sorry...").getBytes()
       );
     }
 
     return new Response(client,key,http_version,status_code,header_map,body);
   }
+
+  public Object respond(Response resp){
+    return null;
+  }
+  //SocketChannel.write shoudld happen here!!!!
+
+
 }
