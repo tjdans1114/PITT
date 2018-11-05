@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 public class HTTPInterpreter {
   //TODO : interpret parsed Event
-  public Response create_response(Event http_request){
+  public static Response create_response(Event http_request){
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
 
@@ -65,10 +65,38 @@ public class HTTPInterpreter {
     return new Response(client,key,http_version,status_code,header_map,body);
   }
 
-  public Object respond(Response resp){
-    return null;
+  public static Object respond(Event http_request){
+    //SocketChannel.write should occur here!!!!
+    Object ret_val = null;
+
+    Event.Type type = http_request.type;
+    //non-io
+    if(type == Event.Type.NON_IO){
+      Response response = create_response(http_request);
+
+      ret_val = null;
+    }
+    //io
+    else if(type == Event.Type.IO){
+      Response response = create_response(http_request);
+      
+
+      ret_val = null;
+    }
+    //cont
+    else if(type == Event.Type.CONTINUATION){
+      //no need to execute create_response! just write the body into the socket!
+
+      ret_val = null;
+    }
+    //finished
+    else if(type == Event.Type.FINISHED){
+      //nothing to do!
+
+
+      ret_val = null;
+    }
+
+    return ret_val;
   }
-  //SocketChannel.write shoudld happen here!!!!
-
-
 }
