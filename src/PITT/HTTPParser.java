@@ -28,7 +28,7 @@ public class HTTPParser {
   *       (blank line : delimiter between Headers / Body]
   * Data...? [Body]
   */
-  private static String[] supported_methods = {"GET","POST"};
+  private static String[] supported_methods = {"GET"}; //currently, only support GET
 
 //  String[] supported_headers = {
 //          "Connection",
@@ -89,6 +89,8 @@ public class HTTPParser {
 
         String header_name = header_line.substring(0,colon_index);
         String header_content = header_line.substring(colon_index+1,header_line.length());
+
+        //TODO : duplicate header? e.g. Range...
         header_map.put(header_name,header_content);
       }
       //deal with unsupported headers...?

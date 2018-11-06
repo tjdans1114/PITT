@@ -32,6 +32,21 @@ public class Response {
     this.body = body;
   }
 
+  //constructor for without-body
+  public Response(SocketChannel client, SelectionKey key,
+                  String http_version, int status_code,
+                  TreeMap<String,String> header_map){
+    this.client = client;
+    this.key = key;
+
+    this.http_version = http_version;
+    this.status_code = status_code;
+    this.status_message = Global.http_status_map.get(status_code);
+
+    this.header_map = header_map;
+  }
+
+
   ByteBuffer get_message(){
     ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
 

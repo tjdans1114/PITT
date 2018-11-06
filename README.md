@@ -39,6 +39,14 @@ Need to study Thread...
       * FINISHED
 
 
+## headers
+if-modified-since : req header
+modified-since : resp header
+
+## todo
+404, 등 error response body는 처음 server 실행할 때 static하게 file에서 열어놓을것!
+THREADING 할것!!!
+
 ## Remark
   * Read Request : from client socket
   * Parse Request : HTTPParser
