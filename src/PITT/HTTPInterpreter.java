@@ -193,7 +193,7 @@ class FileThread extends Thread{
     this.event_queue = event_queue;
   }
 
-
+//additional test conducted : see for change
   public void run(){
     //TODO
     //1. open file from event
