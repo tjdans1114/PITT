@@ -58,7 +58,14 @@ public class Response {
       buffer.put((s+": "+header_map.get(s)).getBytes());
     }
 
-    buffer.put(body);
+    if(body == null){//status code not 200, 206, 304?
+      buffer.put(
+              Global.ERROR_HTML_MAP.get(status_code).getBytes()
+      );
+    }
+    else{
+      buffer.put(body);
+    }
 
     return buffer;
   }

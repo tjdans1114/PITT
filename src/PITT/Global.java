@@ -1,6 +1,7 @@
 package PITT;
 
 import java.util.*;
+import java.nio.file.*;
 
 public class Global {
   public static final String IP = "127.0.0.1"; //localhost
@@ -86,4 +87,27 @@ public class Global {
       put(511,"Network Authentication Required");
     }
   };
+
+  public static final Map<Integer,String> ERROR_HTML_MAP = new TreeMap<Integer,String>(){
+    {
+      try{
+        put(400, new String(Files.readAllBytes(Paths.get("html/400.html"))));
+        put(404, new String(Files.readAllBytes(Paths.get("html/404.html"))));
+        put(408, new String(Files.readAllBytes(Paths.get("html/408.html"))));
+
+        put(500, new String(Files.readAllBytes(Paths.get("html/500.html"))));
+        put(501, new String(Files.readAllBytes(Paths.get("html/501.html"))));
+        put(505, new String(Files.readAllBytes(Paths.get("html/505.html"))));
+
+      }
+      catch(Exception ex){
+        ex.printStackTrace();
+      }
+
+    }
+  };
+
+  public static void main(String[] args){
+    System.out.println("Hello, world");
+  }
 }

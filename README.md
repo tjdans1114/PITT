@@ -87,3 +87,7 @@ EventLoop : Thread-using class. process events from EQ.dQ
 
 ## Remark
   * DMA : file이 커야 효율 나옴
+  * 501 vs 405
+  >Basically, the rule is: <p>
+  >HTTP 501 for methods we don't recognize <p>
+  >HTTP 405 for methods we don't recognize for one particular resource. <p>

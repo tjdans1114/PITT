@@ -27,23 +27,7 @@ public class HTTPInterpreter{
       //first line + header
       header_map.put("a","b");
 
-      body.put((
-        "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n" +
-        "<html>\n" +
-        "\n" +
-        "<head>\n" +
-        "   <title>"+status_code+" "+status_str+"</title>\n" +
-        "</head>\n" +
-        "\n" +
-        "<body>\n" +
-        "   <h1>"+status_str+"</h1>\n" +
-        "   <p>"+status_str/*The requested URL /t.html was not found on this server.*/+"</p>\n" +
-        "</body>\n" +
-        "\n" +
-        "</html>"
-      ).getBytes());
-
-      return new Response(client,key,http_version,status_code,header_map,body);
+      return new Response(client,key,http_version,status_code,header_map);
     }
 
     /** parser error code 200 */
@@ -64,7 +48,7 @@ public class HTTPInterpreter{
       File file = new File(http_request.uri);
 
       //1. 404
-      if(file == null){
+      if(!file.exists()){
         //TODO : not found 404
         return new Response(client, key, http_version, 404, header_map);
       }
@@ -98,57 +82,42 @@ public class HTTPInterpreter{
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
 
-    //non-io
-    if(type == Event.Type.NON_IO){
-      Response response = create_response(http_request);
-
-      try{
-        ByteBuffer buffer = response.get_message();
-        int x = client.write(buffer);
-        //TODO : create continuation?
-        if(buffer.hasRemaining()){
-          return new Event(client,key,buffer);
+    ByteBuffer buffer = ByteBuffer.allocate(0);
+    try{
+      if(type == Event.Type.NON_IO){
+        Response response = create_response(http_request);
+        buffer = response.get_message();
+      }
+      else if(type == Event.Type.CONTINUATION){
+        //no need to execute create_response! just write the body into the socket!
+        buffer = http_request.resp_body;
+      }
+      //io
+      else if(type == Event.Type.IO){
+        //cacheing
+        if(Cache.has(http_request.uri)){
+          buffer = http_request.resp_body;
         }
-
-        //client.close?
-        return null;
-      }
-      catch(Exception ex){
-        return null;
-      }
-    }
-    //finished
-
-    //cont
-    else if(type == Event.Type.CONTINUATION){
-      //no need to execute create_response! just write the body into the socket!
-      try{
-        ByteBuffer buffer = http_request.resp_body;
-        int x = client.write(buffer);
-        //TODO : create continuation?
-        if(buffer.hasRemaining()){
-          return new Event(client,key,buffer);
+        else{
+          //TODO : cache maintenance
+          FileThread f = new FileThread(http_request, EVENT_QUEUE);
+          f.start();
+          return null;
         }
+      }
 
-        //client.close?
-        return null;
+      int x = client.write(buffer);
+      //TODO : create continuation?
+      if(buffer.hasRemaining()){
+        return new Event(client,key,buffer);
       }
-      catch(Exception ex){
-        return null;
-      }
+
+      //client.close?
     }
-    //io
-    else if(type == Event.Type.IO) {
-      FileThread f = new FileThread(http_request,EVENT_QUEUE);
-      f.start();
-      return null;
+    catch(Exception ex){
+      //TODO
     }
-    /*
-    else if(type == Event.Type.FINISHED){
-      //nothing to do! or 2 blank lines?
-      return null;
-    }
-    */
+
     return null;
   }
 
