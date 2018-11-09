@@ -13,7 +13,7 @@ public class EventLoop implements Runnable {
       Event event = event_queue.pop();
 
       //TODO
-      Event cont = HTTPInterpreter.respond(event);
+      Event cont = HTTPInterpreter.respond(event,event_queue);
       if(cont != null){
         event_queue.push(cont);
       }

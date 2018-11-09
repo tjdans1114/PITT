@@ -15,7 +15,7 @@ public class Event {
   *  3. CONTINUATION
   * Finished
   *  4. FINISHED
-  *
+  * 
   * Note that each thread(including main) has its own HTTP Interpreter (HTTPInterpreter)
   * Read contructor code to understand the data members(fields) that each type exploits.
   * Specification may be updated, due to the use of Buffer & File

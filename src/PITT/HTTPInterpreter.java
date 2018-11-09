@@ -93,7 +93,7 @@ public class HTTPInterpreter{
     return new Response(client,key,http_version,status_code,header_map,body);
   }
 
-  public static Event respond(Event http_request){
+  public static Event respond(Event http_request, EventQueue EVENT_QUEUE){
     Event.Type type = http_request.type;
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
@@ -139,7 +139,7 @@ public class HTTPInterpreter{
     }
     //io
     else if(type == Event.Type.IO) {
-      FileThread f = new FileThread(http_request);
+      FileThread f = new FileThread(http_request,EVENT_QUEUE);
       f.start();
       return null;
     }
