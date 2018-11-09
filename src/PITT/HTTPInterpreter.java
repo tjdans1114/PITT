@@ -123,10 +123,8 @@ public class HTTPInterpreter{
 
   public static boolean try304(Event http_request, File file){//debug needed
     if(http_request.header_map.containsKey("If-Modified-Since")){//debug needed
-      //TODO : https://developer.mozilla.org/ko/docs/Web/HTTP/Headers/If-Modified-Since
       String date_string = http_request.header_map.get("If-Modified-Since");
       try{
-
         //parse request modified date
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
         Date req_date = format.parse(date_string);
@@ -163,10 +161,10 @@ public class FileThread extends Thread{
   public FileThread(Event event, EventQueue event_queue){
     this.event = event;
     this.event_queue = event_queue;
-   /* errorChannel = new FileInputStream("400.html").getChannel();
-		buffer400 = errorChannel.map(FileChannel.MapMode.READ_ONLY, 0, errorChannel.size());
-    */
-    errorChannel.close();
+  //  /* errorChannel = new FileInputStream("400.html").getChannel();
+	// 	buffer400 = errorChannel.map(FileChannel.MapMode.READ_ONLY, 0, errorChannel.size());
+  //   */
+  //   errorChannel.close();
   }
 
 //additional test conducted : see for change
@@ -182,38 +180,37 @@ public class FileThread extends Thread{
     try {
       int x = client.write(buffer);
 
-
-      /*if (buffer.hasRemaining()) {
+      if (buffer.hasRemaining()) {
         event_queue.push(new Event(client, key, buffer));
-      }*/
-      ProcessEvent(event);
+      }
+      // ProcessEvent(event);
     }
-    catch(IOException | InterruptedException e){
+    catch(Exception e){//IOException | InterruptedException e
       e.printStackTrace();
 
     }
   }
-  public void IOProcess(Event event)throws IOException, InterruptedException {
-    /*Need to fill IO process, 
-    get file name through uri,
-    connect through
-    FileChannel input_channel = new FileInputStream(file).getChannel;
+  // public void IOProcess(Event event)throws IOException, InterruptedException {
+  //   /*Need to fill IO process, 
+  //   get file name through uri,
+  //   connect through
+  //   FileChannel input_channel = new FileInputStream(file).getChannel;
     
-    */
-  }
+  //   */
+  // }
 
-  public void ProcessEvent(Event event) throws IOException, InterruptedException {
-    ByteBuffer[] buffer;
-    if (!event.error_code){ //If the problem does not have error code
-      if (try304(http_request,file)){ //Not Modified
-        //data = response 304 
-      }
-      else { //Good Respond
-        //data = respond 200
-      }
-    }
-    else {
-      //data = respond according to error_code
-    }
-  }
+  // public void ProcessEvent(Event event) throws IOException, InterruptedException {
+  //   ByteBuffer[] buffer;
+  //   if (!event.error_code){ //If the problem does not have error code
+  //     if (try304(http_request,file)){ //Not Modified
+  //       //data = response 304 
+  //     }
+  //     else { //Good Respond
+  //       //data = respond 200
+  //     }
+  //   }
+  //   else {
+  //     //data = respond according to error_code
+  //   }
+  // }
 }
