@@ -153,13 +153,20 @@ public class HTTPInterpreter{
   }
 }
 
-class FileThread extends Thread{
+public class FileThread extends Thread{
   Event event;
   EventQueue event_queue;
+  FileChannel errorChannel;
+  File file;
+ // MappedByteBuffer buffer_file; //buffer file of error 400, 404, 405
 
   public FileThread(Event event, EventQueue event_queue){
     this.event = event;
     this.event_queue = event_queue;
+   /* errorChannel = new FileInputStream("400.html").getChannel();
+		buffer400 = errorChannel.map(FileChannel.MapMode.READ_ONLY, 0, errorChannel.size());
+    */
+    errorChannel.close();
   }
 
 //additional test conducted : see for change
@@ -175,14 +182,38 @@ class FileThread extends Thread{
     try {
       int x = client.write(buffer);
 
-      if (buffer.hasRemaining()) {
+
+      /*if (buffer.hasRemaining()) {
         event_queue.push(new Event(client, key, buffer));
-      }
+      }*/
+      ProcessEvent(event);
     }
-    catch(Exception ex){
-      //TODO
+    catch(IOException | InterruptedException e){
+      e.printStackTrace();
 
     }
   }
+  public void IOProcess(Event event)throws IOException, InterruptedException {
+    /*Need to fill IO process, 
+    get file name through uri,
+    connect through
+    FileChannel input_channel = new FileInputStream(file).getChannel;
+    
+    */
+  }
 
+  public void ProcessEvent(Event event) throws IOException, InterruptedException {
+    ByteBuffer[] buffer;
+    if (!event.error_code){ //If the problem does not have error code
+      if (try304(http_request,file)){ //Not Modified
+        //data = response 304 
+      }
+      else { //Good Respond
+        //data = respond 200
+      }
+    }
+    else {
+      //data = respond according to error_code
+    }
+  }
 }
