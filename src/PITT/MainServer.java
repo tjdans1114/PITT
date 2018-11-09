@@ -7,8 +7,8 @@ import java.nio.channels.*;
 import java.util.*;
 
 public class MainServer {
-  public static EventQueue event_queue = new EventQueue();
-  public static EventLoop event_loop = new EventLoop();
+  public static EventQueue EVENT_QUEUE = new EventQueue();
+  public static EventLoop event_loop = new EventLoop(EVENT_QUEUE);//share EVENT_QUEUE. between MainSerer & EventLoop
 
 
   public static void main(String[] args) throws IOException{
@@ -52,20 +52,24 @@ public class MainServer {
         else if (key.isReadable()) {//key is ready for reading
           SocketChannel client = (SocketChannel) key.channel();
           //TODO : read request
-          //run(); // read input
-//          ByteBuffer buffer = ByteBuffer.allocate(256);
-//          client.read(buffer); //read message from client
-//
-//          String result = new String(buffer.array()).trim();//trim : removes whitespace
-//          if(!result.equals("")){
-//            System.out.println("message received : " + result);
-//          }
-//
-//          if (result.equals("FINISH")) {//exit code
-//            client.close();
-//            System.out.println("Closing this client... but server keeps running! Try running client again to establish new connection");
-//          }
+          String req_str = read(client);
+          Event ev = HTTPParser.parse(client,key,req_str);
+
+          EVENT_QUEUE.push(ev);
+              //          ByteBuffer buffer = ByteBuffer.allocate(256);
+              //          client.read(buffer); //read message from client
+              //
+              //          String result = new String(buffer.array()).trim();//trim : removes whitespace
+              //          if(!result.equals("")){
+              //            System.out.println("message received : " + result);
+              //          }
+              //
+              //          if (result.equals("FINISH")) {//exit code
+              //            client.close();
+              //            System.out.println("Closing this client... but server keeps running! Try running client again to establish new connection");
+              //          }
         }
+        /*
         else if(key.isWritable()){
           //retrieve response from the key
           Response response = (Response) key.attachment();
@@ -79,8 +83,15 @@ public class MainServer {
 
 
         }
+        */
         key_iterator.remove();//remove current key
       }
+
     }
+
+  }
+
+  static String read(SocketChannel client){
+    return "";
   }
 }

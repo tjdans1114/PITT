@@ -65,6 +65,9 @@ IO : open file, etc... then response message. may result in continuation
 continuation : file is already open. just write body message. may result in another continuation
 finished : done. nothing to process more
 
+MainServer : only reads inputs from client sockets (then enQ to EQ). calls Eventloop.start().
+EventLoop : Thread-using class. process events from EQ.dQ
+
 
 ## Summary
 * `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`

@@ -18,30 +18,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class EventLoop implements Runnable {
   public EventQueue event_queue;
-  public EventQueue io_event_queue; // to select I/O jobs. please only push/pop IOEvent
-  //BlockingQueue<Event> IOQueue = new LinkedBlockingqueue<Event>();
-  //LRUCache Cache = new LRUCache();
-	//FileChannel errorChannel;
-	//MappedByteBuffer buffer400, buffer404, buffer405;
   
-  
-  public EventLoop(){
-    event_queue = new EventQueue();
-    io_event_queue = new EventQueue();
+  public EventLoop(EventQueue event_queue){
+    this.event_queue = event_queue;
   }
 
-
-
-
-
-
-
   //File jobs required
-
   public void run(){
     //TODO : implement Loop architecture
+    while(true){
 
-    //if io, look for the cache then do the io-job
+
+    }
   }
 
   //TODO : future works : Cacheing

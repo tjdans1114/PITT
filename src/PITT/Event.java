@@ -46,15 +46,15 @@ public class Event {
   int start, end; // position of data
 
   static final String crlf = "\r\n";
-  static final int BODY_LENGTH = 1* 1024 * 1024;//2MB
+  static final int BODY_LENGTH = 2 * 1024 * 1024;//2MB
   /*
     \r = CR (Carriage Return) // Used as a new line character in Mac OS before X
     \n = LF (Line Feed) // Used as a new line character in Unix/Mac OS X
     \r\n = CR + LF // Used as a new line character in Windows
   */
 
-  /** Constructors */
-  // 1. constructor for NON_IO
+  /** Constructors ************************************/
+  // 1. constructor for NON_IO : i.e. errors
   public Event(SocketChannel client, SelectionKey key,
                int error_code){
     this.client = client;
