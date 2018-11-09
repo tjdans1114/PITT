@@ -1,21 +1,5 @@
 package PITT;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-//import java.util.ArrayList;
-
 public class EventLoop implements Runnable {
   public EventQueue event_queue;
   
@@ -25,12 +9,14 @@ public class EventLoop implements Runnable {
 
   //File jobs required
   public void run(){
-    //TODO : implement Loop architecture
     while(true){
+      Event event = event_queue.pop();
 
-
+      //TODO
+      Event cont = HTTPInterpreter.respond(event);
+      if(cont != null){
+        event_queue.push(cont);
+      }
     }
   }
-
-  //TODO : future works : Cacheing
 }

@@ -5,6 +5,7 @@ import java.nio.*;
 public class Cache {
   //TODO
   //define fields. e.g. Map<String, ByteBuffer> ? priorityqueue? idon'know
+
   public static boolean has(String uri){
     //TODO
     return false;
@@ -15,7 +16,7 @@ public class Cache {
     return null;
   }
 
-  public static void maintain(Object new_input){
+  public static void maintain(String str, ByteBuffer new_input){
     //TODO
   }
 }

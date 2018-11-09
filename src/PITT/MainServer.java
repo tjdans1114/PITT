@@ -56,42 +56,33 @@ public class MainServer {
           Event ev = HTTPParser.parse(client,key,req_str);
 
           EVENT_QUEUE.push(ev);
-              //          ByteBuffer buffer = ByteBuffer.allocate(256);
-              //          client.read(buffer); //read message from client
-              //
-              //          String result = new String(buffer.array()).trim();//trim : removes whitespace
-              //          if(!result.equals("")){
-              //            System.out.println("message received : " + result);
-              //          }
-              //
-              //          if (result.equals("FINISH")) {//exit code
-              //            client.close();
-              //            System.out.println("Closing this client... but server keeps running! Try running client again to establish new connection");
-              //          }
         }
-        /*
         else if(key.isWritable()){
-          //retrieve response from the key
-          Response response = (Response) key.attachment();
-          //SocketChannel client = (SocketChannel) key.channel();//???
-
-          //write response
-          SocketChannel client = response.client;
-          ByteBuffer response_data = response.get_message();
-          int data_size = client.write(response_data); // debugging required
-            // retrieve response
-
-
+          //TODO : NOTHING!!!
         }
-        */
+
         key_iterator.remove();//remove current key
       }
-
     }
-
   }
 
   static String read(SocketChannel client){
-    return "";
+    try{
+      ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+      //timeout?
+
+      while(true){
+        int bytes_read = client.read(buffer);
+
+        if(bytes_read == -1){
+          break;
+        }
+      }
+
+      return buffer.toString();
+    }
+    catch(Exception ex){
+      return null;
+    }
   }
 }

@@ -6,16 +6,17 @@ import java.nio.channels.*;
 import java.util.*;
 import java.text.*;
 
-public class HTTPInterpreter {
+public class HTTPInterpreter{
   //TODO : interpret parsed Event
   public static Response create_response(Event http_request){
+    //only for NON_IO, (IO?)
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
 
     String http_version = "HTTP/1.1";
     int status_code;
     TreeMap<String,String> header_map = new TreeMap<String,String>();
-    ByteBuffer body = ByteBuffer.allocate(0);
+    ByteBuffer body = ByteBuffer.allocate(Global.BUFFER_SIZE);
 
     /** case : parse error occurred */
     if(http_request.error_code != 200){
@@ -92,39 +93,63 @@ public class HTTPInterpreter {
     return new Response(client,key,http_version,status_code,header_map,body);
   }
 
-  public static Object respond(Event http_request){
-    //SocketChannel.write should occur here!!!!
-    Object ret_val = null;
-
+  public static Event respond(Event http_request){
     Event.Type type = http_request.type;
+    SocketChannel client = http_request.client;
+    SelectionKey key = http_request.key;
+
     //non-io
     if(type == Event.Type.NON_IO){
       Response response = create_response(http_request);
 
-      ret_val = null;
-    }
-    //io
-    else if(type == Event.Type.IO){
-      Response response = create_response(http_request);
-      
+      try{
+        ByteBuffer buffer = response.get_message();
+        int x = client.write(buffer);
+        //TODO : create continuation?
+        if(buffer.hasRemaining()){
+          return new Event(client,key,buffer);
+        }
 
-      ret_val = null;
+        //client.close?
+        return null;
+      }
+      catch(Exception ex){
+        return null;
+      }
     }
+    //finished
+
     //cont
     else if(type == Event.Type.CONTINUATION){
       //no need to execute create_response! just write the body into the socket!
+      try{
+        ByteBuffer buffer = http_request.resp_body;
+        int x = client.write(buffer);
+        //TODO : create continuation?
+        if(buffer.hasRemaining()){
+          return new Event(client,key,buffer);
+        }
 
-      ret_val = null;
+        //client.close?
+        return null;
+      }
+      catch(Exception ex){
+        return null;
+      }
     }
-    //finished
+    //io
+    else if(type == Event.Type.IO) {
+      FileThread f = new FileThread(http_request);
+      f.start();
+      return null;
+    }
+    /*
     else if(type == Event.Type.FINISHED){
-      //nothing to do!
-
-
-      ret_val = null;
+      //nothing to do! or 2 blank lines?
+      return null;
     }
-
-    return ret_val;
+    */
+    return null;
   }
 
   public static boolean try304(Event http_request, File file){//debug needed
@@ -157,4 +182,38 @@ public class HTTPInterpreter {
     //304 failed
     return false;
   }
+}
+
+class FileThread extends Thread{
+  Event event;
+  EventQueue event_queue;
+
+  public FileThread(Event event, EventQueue event_queue){
+    this.event = event;
+    this.event_queue = event_queue;
+  }
+
+
+  public void run(){
+    //TODO
+    //1. open file from event
+    File file = null;
+    //2. create response message buffer
+    ByteBuffer buffer = null;
+    //3.
+    SocketChannel client = event.client;
+    SelectionKey key = event.key;
+    try {
+      int x = client.write(buffer);
+
+      if (buffer.hasRemaining()) {
+        event_queue.push(new Event(client, key, buffer));
+      }
+    }
+    catch(Exception ex){
+      //TODO
+
+    }
+  }
+
 }
