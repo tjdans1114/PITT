@@ -3,6 +3,9 @@
 ![logo](Logo.png)
 
 
+## **공지**
+밑에 서머리 부분에 구현시 신경써야 할 부분 (평가표를 바탕으로 작성된)을 잘 고려해 구현 부탁드립니다!!
+
 ## Documents
 watch `/Documents`
 
@@ -47,6 +50,7 @@ modified-since : resp header
 404, 등 error response body는 처음 server 실행할 때 static하게 file에서 열어놓을것!
 THREADING 할것!!!
 
+
 ## Remark
   * Read Request : from client socket
   * Parse Request : HTTPParser
@@ -69,7 +73,7 @@ MainServer : only reads inputs from client sockets (then enQ to EQ). calls Event
 EventLoop : Thread-using class. process events from EQ.dQ
 
 
-## Summary
+## Summary  ~~연수 마크다운 배운 기념으로 ~~
 * `HTTPParser` : parse HTTP request string(buffer) into `Event`. preprocess into `IO` or `NON_IO`
 * `Event` : `IO` or `NON_IO`.
 * HTTPInterpreter : interpret parsed HTTP Request & return HTTP Response
@@ -84,6 +88,12 @@ EventLoop : Thread-using class. process events from EQ.dQ
     + HTTP Response is returned to client by Worker Thread.
   - if dequeued IO `Event`,
     + main thread processes HTTP Response to the client.
+
+* 현재 제작시 고려해야 할 사항 : 평가표를 기준으로
+  - event loop내에서 처리하기에 적절하지 않은 Task에 대해서 이해하고 이를 Thread pool에 맡겨서 처리하였고 Task의 결과가 새로운 event로 공급되어   event loop내에서 처리되도록 구현했다. (양방향 통신) -> 아마 이부분이 다시 피니시 된 것도 루프에 넣으라는 의미인가 싶은데, 아니면 컨티뉴만 넣으라는 말인 것 같기도 함.
+  - Web Browser가 보낸 http request header를 파싱하고 Method, URI, Protocol에 대한 정보를 추출하였으며 'Connection' header에 대한 동작을 구현하였다.
+또한 http request header의 크기가 사실상 무한히 커질 수 있음을 이해하고 이를 적절히 제한하여 Memory 관련 문제를 회피하기 위한 구현을 하였다. ->현재 이 부분이 잘 구현되어있는지 모르겠음. (헤더 크기가 커질때 이걸 어떻게 처리해야 할 지 고민을 좀 더 해봐야 할 것 같음.)
+
 
 ## Remark
   * DMA : file이 커야 효율 나옴
