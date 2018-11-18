@@ -151,7 +151,7 @@ public class HTTPInterpreter{
   }
 }
 
-public class FileThread extends Thread{
+class FileThread extends Thread{
   Event event;
   EventQueue event_queue;
   FileChannel errorChannel;

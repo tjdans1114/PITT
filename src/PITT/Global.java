@@ -9,6 +9,10 @@ public class Global {
 
   public static final int BUFFER_SIZE = 1048576 * 2;//2MB
 
+  public static final int HEADER_SIZE = 1024; // 1024 characters
+
+
+
   public static final Map<Integer, String> http_status_map  = new TreeMap<Integer,String>(){
     {
       //https://en.wikipedia.org/wiki/List_of_HTTP_status_codes

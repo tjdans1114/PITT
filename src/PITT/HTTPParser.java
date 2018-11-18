@@ -75,10 +75,16 @@ public class HTTPParser {
       }
 
       /** 2. headers : general, request, entity */
+      int header_length = 0;
       while(true){
         String header_line = reader.readLine();
         if(header_line.length() == 0){
           break;
+        }
+
+        header_length += header_line.length() + 1;//1 for '\n'
+        if(header_length > Global.HEADER_SIZE){
+          return new Event(client, key, 431);
         }
 
         //header line is parsed by colon
