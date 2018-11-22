@@ -112,10 +112,13 @@ public class HTTPParser {
       }
 
       /** 4. further preprocessing */
+      String connection = header_map.get("connection");
+
       return new Event(
               client, key, Event.Type.IO,
               method,uri,http_version,
-              header_map,body, 200);
+              header_map,body, 200,
+              connection);
     }
     catch(Exception ex){
       ex.printStackTrace();

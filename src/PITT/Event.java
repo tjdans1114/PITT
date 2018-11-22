@@ -40,11 +40,15 @@ public class Event {
 
   int error_code;
 
+  /** Processed Headers */
+  String connection;
+
 
   ByteBuffer resp_body; //entailed open bytebuffer : for continuation
   //for 206
   int start, end; // position of data
 
+  /**************************************************************************************/
   static final String crlf = "\r\n";
   static final int BODY_LENGTH = 2 * 1024 * 1024;//2MB
   /*
@@ -62,13 +66,16 @@ public class Event {
     this.type = Event.Type.NON_IO;
 
     this.error_code = error_code;
+
+    this.connection = null;
   }
 
   // 2. constructor for IO
   public Event(SocketChannel client, SelectionKey key,
                Type type, String method, String uri, String http_version,
                Map<String,String> header_map, StringBuffer req_body,
-               int error_code){
+               int error_code,
+               String connection){
     this.client = client;
     this.key = key;
     this.type = type;
@@ -80,16 +87,21 @@ public class Event {
     this.req_body = req_body;
 
     this.error_code = error_code;
+
+    this.connection = connection;
   }
 
   // 3. continuation
   public Event(SocketChannel client, SelectionKey key,
-               ByteBuffer continuation){
+               ByteBuffer continuation,
+               String connection){
     this.client = client;
     this.key = key;
     this.type = Type.CONTINUATION;
 
     this.resp_body = continuation;//remaining data to write
+
+    this.connection = connection;
   }
 
   // 4. finished

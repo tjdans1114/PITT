@@ -108,11 +108,14 @@ public class HTTPInterpreter{
 
       int x = client.write(buffer);
       //TODO : create continuation?
+      String connection = http_request.connection;
       if(buffer.hasRemaining()){
-        return new Event(client,key,buffer);
+        return new Event(client,key,buffer,connection);
+      }
+      else{
+        handle_connection(http_request);
       }
 
-      //client.close?
     }
     catch(Exception ex){
       //TODO
@@ -149,9 +152,35 @@ public class HTTPInterpreter{
     //304 failed
     return false;
   }
+  private static void handle_connection(Event http_request){
+    Event.Type type = http_request.type;
+    if(!(type == Event.Type.IO || type == Event.Type.NON_IO)){
+      return;
+    }
+
+    SocketChannel client = http_request.client;
+    //SelectionKey key = http_request.key;
+    if(http_request.header_map.containsKey("Connection") &&
+            http_request.header_map.get("Connection").equals("keep-alive")){
+      //TODO
+      return; //keep-alive!
+    }
+
+    //close
+    try {
+      client.close();
+    }
+    catch(IOException ex){
+      //TODO
+    }
+
+  }
 }
 
 class FileThread extends Thread{
+  private static final int THREAD_MAX = 4;
+  private static int THREAD_COUNT = 0;
+
   Event event;
   EventQueue event_queue;
   FileChannel errorChannel;
@@ -181,7 +210,7 @@ class FileThread extends Thread{
       int x = client.write(buffer);
 
       if (buffer.hasRemaining()) {
-        event_queue.push(new Event(client, key, buffer));
+        event_queue.push(new Event(client, key, buffer, event.connection));
       }
       // ProcessEvent(event);
     }
