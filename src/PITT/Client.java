@@ -16,11 +16,11 @@ public class Client {
 
     //Test codes
     ArrayList<String> string_list = new ArrayList<String>();
-    string_list.add("test1");
-    string_list.add("test2");
-    string_list.add("test3");
-    string_list.add("test4");
-    string_list.add("FINISH");
+    string_list.add("GET /Logo.png HTTP/1.1\n");
+//    string_list.add("test2");
+//    string_list.add("test3");
+//    string_list.add("test4");
+//    string_list.add("FINISH");
 
     for(String string : string_list){
       byte[] message = new String(string).getBytes();

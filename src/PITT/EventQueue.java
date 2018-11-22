@@ -42,6 +42,10 @@ public class EventQueue {
     }
   }
 
+  // boolean empty(){
+  //   return Q.size() == 0;
+  // }
+
   //DEPRECATED
   Event top(){
     return Q.peek();

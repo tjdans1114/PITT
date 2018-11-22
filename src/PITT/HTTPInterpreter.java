@@ -10,6 +10,7 @@ public class HTTPInterpreter{
   //TODO : interpret parsed Event
   public static Response create_response(Event http_request){
     //only for NON_IO, (IO?)
+    System.out.println("creating response");
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
 
@@ -78,6 +79,8 @@ public class HTTPInterpreter{
   }
 
   public static Event respond(Event http_request, EventQueue EVENT_QUEUE){
+    System.out.println("respond responding...");
+    System.out.println(http_request.error_code);
     Event.Type type = http_request.type;
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
@@ -85,26 +88,37 @@ public class HTTPInterpreter{
     ByteBuffer buffer = ByteBuffer.allocate(0);
     try{
       if(type == Event.Type.NON_IO){
+        System.out.println("NON IO TYPE");
         Response response = create_response(http_request);
         buffer = response.get_message();
+
+        byte[] bytes = new byte[buffer.position()];
+        buffer.flip();
+        buffer.get(bytes);
+        System.out.println("response buffer is : " + new String(bytes));
+        System.out.println(http_request.http_version.length());
       }
       else if(type == Event.Type.CONTINUATION){
+        System.out.println("CONTINUATION TYPE");
         //no need to execute create_response! just write the body into the socket!
         buffer = http_request.resp_body;
       }
       //io
       else if(type == Event.Type.IO){
+        System.out.println("IO TYPE");
         //cacheing
         if(Cache.has(http_request.uri)){
           buffer = http_request.resp_body;
         }
         else{
+          System.out.println("THREADING START");
           //TODO : cache maintenance
           FileThread f = new FileThread(http_request, EVENT_QUEUE);
           f.start();
           return null;
         }
       }
+
 
       int x = client.write(buffer);
       //TODO : create continuation?
@@ -215,6 +229,7 @@ class FileThread extends Thread{
       // ProcessEvent(event);
     }
     catch(Exception e){//IOException | InterruptedException e
+      System.out.println("error occurred! at : ");
       e.printStackTrace();
 
     }

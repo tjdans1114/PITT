@@ -64,7 +64,7 @@ public class Event {
     this.client = client;
     this.key = key;
     this.type = Event.Type.NON_IO;
-
+    
     this.error_code = error_code;
 
     this.connection = null;
@@ -72,13 +72,13 @@ public class Event {
 
   // 2. constructor for IO
   public Event(SocketChannel client, SelectionKey key,
-               Type type, String method, String uri, String http_version,
+               String method, String uri, String http_version,
                Map<String,String> header_map, StringBuffer req_body,
                int error_code,
                String connection){
     this.client = client;
     this.key = key;
-    this.type = type;
+    this.type = Event.Type.IO;
 
     this.method = method;
     this.uri = uri;
