@@ -12,7 +12,9 @@ public class HTTPInterpreter{
     //only for NON_IO, (IO?)
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
-
+    public int limit;
+    public int counter;
+    private int thread_array [limit] = [0];
     String http_version = "HTTP/1.1";
     int status_code;
     TreeMap<String,String> header_map = new TreeMap<String,String>();
@@ -45,17 +47,19 @@ public class HTTPInterpreter{
     }
     else {
       //involves file
-      File file = new File(http_request.uri);
+      String filename = http_request.uri.substring(1);
+      File file = new File(filename);
 
-      //1. 404
+      //1. 404 //? does it not require finding? thread burden?
       if(!file.exists()){
-        //TODO : not found 404
+        status_code = 404;
         return new Response(client, key, http_version, 404, header_map);
       }
 
       //2. 304
       if(try304(http_request,file)){//debug needed
         //TODO : 304
+        status_code = 304;
         return new Response(client, key, http_version, 304, header_map);
       }
 
@@ -64,9 +68,32 @@ public class HTTPInterpreter{
       if(http_request.header_map.containsKey("Range")){
         //TODO : note that there are If-Range, Content-Range, Range headers
         // read https://svn.apache.org/repos/asf/labs/webarch/trunk/http/draft-fielding-http/p5-range.html for detail
+        /*
+        under the assumption 
+      
+        String range = header_map.get("Range");
+        int i = range.indexOf("=");
+        int j = range.indexOf("-");
+
+        long start = Long.parseLong(range.substring(i + 1, j));
+        long end = 0;
+        if (j < range.length() - 1) {
+          end = Long.parseLong(range.substring(j + 1));
+        }
+        if (end == 0) {
+          end = start + 2 * 1024 * 1024 - 1; 
+        }
+        if (end > file.length() - 1) {
+          end = file.length() - 1; 
+        }
+        */
         status_code = 206;
       }
 
+      /*else {
+        data_code = 200
+      }
+      */
 
       ///////////////////////////////////////////////////////////////
       body.put(
@@ -81,6 +108,13 @@ public class HTTPInterpreter{
     Event.Type type = http_request.type;
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
+
+    /*Need to fill IO process, 
+  //   get file name through uri,
+  //   connect through
+  //   FileChannel input_channel = new FileInputStream(file).getChannel;
+    // get /logo.png http1.1  new file("logo.png")
+  //   */
 
     ByteBuffer buffer = ByteBuffer.allocate(0);
     try{
@@ -97,11 +131,24 @@ public class HTTPInterpreter{
         //cacheing
         if(Cache.has(http_request.uri)){
           buffer = http_request.resp_body;
+          /*
+          value = Cache.get(uri);
+          */
         }
         else{
           //TODO : cache maintenance
-          FileThread f = new FileThread(http_request, EVENT_QUEUE);
-          f.start();
+          if (counter <= limit) {
+            int k =0;
+            while(thread_array[k]==1){
+              k++;}
+            thread_array[k]=1;
+            FileThread f = new FileThread(k, http_request, EVENT_QUEUE);
+            f.start();
+          }
+          else {
+            event_queue.push(http_request);
+            System.out.println("Thread full");
+          }
           return null;
         }
       }
@@ -158,37 +205,111 @@ public class FileThread extends Thread{
   File file;
  // MappedByteBuffer buffer_file; //buffer file of error 400, 404, 405
 
-  public FileThread(Event event, EventQueue event_queue){
+  public FileThread(int thread_number, Event event, EventQueue event_queue){
     this.event = event;
     this.event_queue = event_queue;
-  //  /* errorChannel = new FileInputStream("400.html").getChannel();
-	// 	buffer400 = errorChannel.map(FileChannel.MapMode.READ_ONLY, 0, errorChannel.size());
-  //   */
-  //   errorChannel.close();
   }
 
 //additional test conducted : see for change
   public void run(){
     //TODO
+    counter++;
+    System.out.println("IO Thread : " + thread_number + " Start");
     //1. open file from event
-    File file = null;
-    //2. create response message buffer
+    String filename = event.uri.substring(1); 
+    this.file = new File(filename);
     ByteBuffer buffer = null;
+    int read_start, read_end; // read range
+    if (file.exists()){//better to operate in here?
+      FileChannel inChannel = new FileInputStream(fileName).getChannel();
+      //event.size = (int) inChannel.size(); // size of event
+      //Cache.set(event.uri, buffer);
+
+      // first time io
+      if (event.type==Event.Type.IO){
+        if ((file.length() >= Global.BUFFER_SIZE){ // goes in from start IO
+          buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, start, Global.BUFFER_SIZE);
+          //Mark that it is only read to certain point : call this marker
+          event_queue.push(event);
+        } else{
+          buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, start, end-start);
+        }
+      }
+      else {
+        if ((file.length()-marker)>=Global.BUFFER_SIZE){
+          buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, Global.BUFFER_SIZE);
+          event_queue.push(event);
+        }
+        else {
+          buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, end-marker);
+        }
+      }
+      Cache.set(event.uri, buffer);
+      //Need to return the range of file; 
+      body.put{
+        buffer;
+      }
+      inChannel.close();
+    
+      /* Think 404 would be better if located here
+    }else {
+      buffer = 
+    }
+    */
+    //2. create response message buffer
+    
     //3.
     SocketChannel client = event.client;
     SelectionKey key = event.key;
+    /*
+    Consider Range : how much to return
+    */
     try {
-      int x = client.write(buffer);
-
+      
       if (buffer.hasRemaining()) {
         event_queue.push(new Event(client, key, buffer));
       }
       // ProcessEvent(event);
+
+      /*
+      has a data buffer : require return header
+      header buffer.flip : get the last info;
+      long size = header.flip.limit() + buffer.flip.limit();
+      or
+      long size = header.pos() + buffer.pos();
+
+      long input_size = client.write(data)
+
+      if (input_size < size){
+        body.put(header);
+        body.put(buffer);
+        event.key.attach(event);
+      }
+      try {
+				event.key.interestOps(SelectionKey.OP_WRITE);
+				event.key.selector().wakeup();
+      */
+
     }
     catch(Exception e){//IOException | InterruptedException e
       e.printStackTrace();
-
+      event.key.attach(null);
+			event.key.cancel();
+			event.key.channel().close();
     }
+    /*
+    public boolean modified(Event event) throws IOException, InterruptedException {
+      File file = new File(event.uri.substring(1));
+      if (file.exists()) {
+        System.out.println("File Exist");
+        String date = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date(file.lastModified()));
+        event.header_map.put("If-Modified-Since", date);
+        return true;
+      } else {
+        return false;
+      }*/
+      System.out.println("IO Thread" + thread_number+ "End");
+      thread_array[thread_number] = 0;
   }
   // public void IOProcess(Event event)throws IOException, InterruptedException {
   //   /*Need to fill IO process, 
