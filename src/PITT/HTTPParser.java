@@ -5,36 +5,12 @@ import java.io.*;
 import java.nio.channels.*;
 
 public class HTTPParser {
-  /*
-  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages for detail
-  * also refer to https://www.tutorialspoint.com/http/http_requests.htm
-  * HTTP 1.1 maybe?
-  */
-
-  /*
-  * [Start Line] : METHOD + request target(URL) + HTTP Version
-  *   definition of 'supported methods' are required
-  * [Headers] (General Headers, Request Headers, Entity Headers) : semi-colon is a delimiter
-  *   for thorough headers, refer to https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
-  *   for better guide, refer to https://developer.mozilla.org/ko/docs/Web/HTTP/Headers
-  * [Body] : not for GET, HEAD, DELETE, or OPTIONS
-  */
-  // HOW to handle body?????????
-
-  /* example
-  * POST /background.png HTTP/1.0   [Start Line]
-  * Host: ...                 [Headers]
-  * User-Agent: ...
-  *       (blank line : delimiter between Headers / Body]
-  * Data...? [Body]
-  */
   private static String[] supported_methods = {"GET"}; //currently, only support GET
 
 //  String[] supported_headers = {
 //          "Connection",
-//          "Range", //for streaming?
+//          "Range", //for streaming? TODO
 //          "If-Modified-Since", //for cacheing?
-//          //TODO : determine which headers are to be implemented
 //  };
 
   private static boolean is_supported_method(String m){
