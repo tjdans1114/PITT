@@ -303,41 +303,53 @@ class FileThread extends Thread{
     //1. 404
     if(!file.exists()){
       //404
+      event.error_code = 404;
     }
 
     //2. 304
-    if(true){
-
+    if(try304(http_request,file)){
+      
     }
 
-
     //not 404 nor 304
-
-//    FileChannel inChannel = new FileInputStream(fileName).getChannel();
+//  FileChannel inChannel;
+//  long marker = event.marker;
 //    //event.size = (int) inChannel.size(); // size of event
 //    //Cache.set(event.uri, buffer);
 //
 //    // first time io
-//    if (event.type==Event.Type.IO){
-//      if ((file.length() >= Global.BUFFER_SIZE){ // goes in from start IO
-//        buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, start, Global.BUFFER_SIZE);
-//        //Mark that it is only read to certain point : call this marker
-//        event_queue.push(event);
-//      }
-//      else{
-//        buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, start, end-start);
-//      }
-//    }
-//    else {
-//      if ((file.length()-marker)>=Global.BUFFER_SIZE){
-//        buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, Global.BUFFER_SIZE);
-//        event_queue.push(event);
-//      }
-//      else {
-//        buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, end-marker);
-//      }
-//    }
+//  if (event.type==Event.Type.IO){
+//      //Mark that it is only read to certain point : call this marker
+//    inChannel = new FileInputStream(fileName).getChannel();
+//    if ((file.length()-marker > Global.BUFFER_SIZE){ // goes in from start IO
+//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, Global.BUFFER_SIZE);
 //
+//      marker += Global.BUFFER_SIZE;
+//      Event new_event = Event(client, key, inChannel, marker, "Keep Alive");
+//      event_queue.push(new_event);
+//    }
+//    else{
+//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, end-marker);
+//      Event new_event = Event(client, key); //Finished
+//      event_queue.push(new_event);
+//    }
+//  }
+//  else if (event.type==Event.Type.CONTINUATION){
+//    marker = event.start;
+//    inChannel = event.file_channel;
+//    if ((file.length()-marker > Global.BUFFER_SIZE){ // goes in from start IO
+//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, Global.BUFFER_SIZE);
+//      //Mark that it is only read to certain point : call this marker
+//      event.start += marker;
+//      event_queue.push(event);
+//    }
+//    else{
+//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, end-marker);
+//      Event new_event = Event(client, key); //Finished
+//      event_queue.push(new_event);
+//    }
+//  }
+
 //    Cache.set(event.uri, buffer);
 //    //Need to return the range of file;
 //    body.put{
