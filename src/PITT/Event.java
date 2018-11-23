@@ -43,10 +43,11 @@ public class Event {
   /** Processed Headers */
   String connection;
 
+  FileChannel file_channel; //entailed open bytebuffer : for continuation
+  int start; //file channel start position
 
-  ByteBuffer resp_body; //entailed open bytebuffer : for continuation
   //for 206
-  int start, end; // position of data
+  //int start, end; // position of data
 
   /**************************************************************************************/
   static final String crlf = "\r\n";
@@ -93,15 +94,17 @@ public class Event {
 
   // 3. continuation
   public Event(SocketChannel client, SelectionKey key,
-               ByteBuffer continuation,
+               FileChannel file_channel, int start,
                String connection){
     this.client = client;
     this.key = key;
     this.type = Type.CONTINUATION;
 
-    this.resp_body = continuation;//remaining data to write
+    this.file_channel = file_channel;//remaining data to write
 
     this.connection = connection;
+
+    this.start = start;
   }
 
   // 4. finished
