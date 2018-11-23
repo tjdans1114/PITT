@@ -74,7 +74,7 @@ public class HTTPParser {
           return new Event(client, key, 400);
         }
 
-        String header_name = header_line.substring(0,colon_index);
+        String header_name = header_line.substring(0,colon_index).toLowerCase();
         String header_content = header_line.substring(colon_index+1);
 
         //TODO : duplicate header? e.g. Range...
@@ -104,7 +104,7 @@ public class HTTPParser {
     catch(Exception ex){
       ex.printStackTrace();
 
-      return new Event(client, key, 400);//bad request
+      return new Event(client, key, 500);// internal server error
     }
   }
 }
