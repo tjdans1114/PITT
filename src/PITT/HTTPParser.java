@@ -44,9 +44,6 @@ public class HTTPParser {
       method = parsed_first_line[0];
       uri = parsed_first_line[1];
       http_version = parsed_first_line[2];
-//      System.out.println(method);
-//      System.out.println(uri);
-//      System.out.println(http_version);
 
       if(!is_supported_method(method)){//unsupported method : 501
         return new Event(client, key, 501);

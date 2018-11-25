@@ -121,7 +121,7 @@ public class HTTPInterpreter{
     String http_version = "HTTP/1.1";
 
     //1. first line
-    String first_line = status_code + " " + status_str + " " + http_version;
+    String first_line = http_version + " " + status_code + " " + status_str;
 
     //2. header
     String header = "";//TODO
@@ -136,6 +136,7 @@ public class HTTPInterpreter{
   }
 
   public static Event respond(Event http_request, EventQueue EVENT_QUEUE){
+    //TODO : add last-modified header to the response
     //System.out.println("respond responding...");
     //System.out.println(http_request.error_code);
     Event.Type type = http_request.type;
@@ -145,11 +146,12 @@ public class HTTPInterpreter{
     try{
       if(type == Event.Type.NON_IO){
         //System.out.println("NON IO TYPE");
-        ByteBuffer buffer = ByteBuffer.allocate(0);
+        ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
         String response_str = create_response_NON_IO(http_request);
         System.out.println(response_str);
         buffer.put(response_str.getBytes());
 
+        buffer.flip();
         while(buffer.hasRemaining()){ //TODO : temporarily, write to client with while loop
           int x = client.write(buffer);
         }
@@ -183,10 +185,10 @@ public class HTTPInterpreter{
           //TODO : cache maintenance & verification of code behavior
 
           //1. write first line, headers
-          String first_line = "200 OK HTTP/1.1";//TODO
+          String first_line = "HTTP/1.1 200 OK";//TODO
           String headers = "";//TODO
 
-          ByteBuffer firstline_header_buffer = ByteBuffer.allocate(0);
+          ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
           firstline_header_buffer.put((first_line + "\n" + headers + "\n\n").getBytes());
 
           client.write(firstline_header_buffer);
@@ -324,28 +326,35 @@ class FileThread extends Thread{
         //1. 404
         if (!file.exists()) {
           //TODO : this part & 304 part with NON_IO may be reduced to some 'write_error_to_client' function...
-          ByteBuffer buffer = ByteBuffer.allocate(0);
+          ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
           event.error_code = 404;
           String response_str = HTTPInterpreter.create_response_NON_IO(event);
           System.out.println(response_str);
           buffer.put(response_str.getBytes());
 
+
+          buffer.flip();
           while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+//            System.out.println(client);
+//            System.out.println(client.isOpen()?"client is open" : "client is not open");
+//            System.out.println(client.isConnected()?"client is connected" : "client is not connected");
             int x = client.write(buffer);
+            System.out.println(x + " bytes");
           }
 
-          //String connection = http_request.connection;
+//          String connection = http_request.connection;
           HTTPInterpreter.handle_connection(event);
         }
 
         //2. 304
         else if (HTTPInterpreter.try304(event, file)){
-          ByteBuffer buffer = ByteBuffer.allocate(0);
+          ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
           event.error_code = 304;
           String response_str = HTTPInterpreter.create_response_NON_IO(event);
           System.out.println(response_str);
           buffer.put(response_str.getBytes());
 
+          buffer.flip();
           while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
             int x = client.write(buffer);
           }
@@ -355,6 +364,8 @@ class FileThread extends Thread{
         }
         else{
           //TODO : main part, maybe with cache maintenance
+          // TODO : NA HYUN SOO
+
 
         }
       }
@@ -455,16 +466,9 @@ class FileThread extends Thread{
     } else {
     return false;
     }*/
-    System.out.println("IO Thread" + thread_number+ "End");
+    System.out.println("IO Thread " + thread_number+ " End");
 
     /************************************************************************/
     THREAD_COUNT--; //manage counter
   }
 }
-
-// get string from bytebuffer
-//byte[] bytes = new byte[buffer.position()];
-//buffer.flip();
-//buffer.get(bytes);
-//System.out.println("response buffer is : " + new String(bytes));
-//System.out.println(http_request.http_version.length());
