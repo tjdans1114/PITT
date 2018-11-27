@@ -14,25 +14,24 @@ public class MainServer {
   public static void main(String[] args) throws IOException{
     /* Basic Server Configuration */
 
-    Selector selector = Selector.open();  //selector : selects SelectableChannel Objects
-    ServerSocketChannel socket = ServerSocketChannel.open();  //socket : selectable channel for stream-oriented listening sockets
-    InetSocketAddress address = new InetSocketAddress(Global.IP,Global.PORT);//localhost
-    socket.bind(address); // Binds the channel's socket to a local address and configures the socket to listen for connections
-    socket.configureBlocking(false);//configure : Non-Blocking
+    Selector selector = Selector.open();
+    ServerSocketChannel socket = ServerSocketChannel.open();
+    InetSocketAddress address = new InetSocketAddress(Global.IP,Global.PORT);
+    socket.bind(address);
+    socket.configureBlocking(false);
 
       //ops : operation set
-    int ops = socket.validOps(); // ops == SelectionKey.OP_ACCEPT
-    SelectionKey selection_key = socket.register(selector,ops,null);
+    int ops = socket.validOps();
+    socket.register(selector,ops,null);
 
-    /* Running MainServer */ //Infinite loop : MainServer keeps running
+    /* Running MainServer */
     System.out.println("server running ... ");
     int count = 0; //# of clients
 
     event_loop.start();//run event loop TODO : not working well
 
-    while(true) {//TODO : try-catch for buffer overflow exceptions...
-      //System.out.println("Main inner loop running");
-
+    while(true) {//TODO : try-catch for buffer overflow exceptions... or other exceptions. server should keep running
+      /**/
       selector.select();
       Set<SelectionKey> keys = selector.selectedKeys();
       Iterator<SelectionKey> key_iterator = keys.iterator();
@@ -49,7 +48,7 @@ public class MainServer {
           client.configureBlocking(false);//non-blocking
           client.register(selector, SelectionKey.OP_READ); //convert it to readable state
 
-          /* do something... */
+          /** do something... */
           count++;
           System.out.println("Connection Accepted : " + client.getRemoteAddress() + " -> " + client.getLocalAddress());
         }
@@ -58,15 +57,19 @@ public class MainServer {
           //System.out.println(client);
           //TODO : read request
           //System.out.println("reading from client...");
+          if(!client.isConnected()){
+            continue;
+          }
 
           String client_remote_address = client.getRemoteAddress().toString();
           String request_string = read(client);
 
-          System.out.println("Request : " + request_string + " from " + client_remote_address);
           //System.out.println("reading done");
           if(request_string == null || request_string.length() == 0){
             continue;
           }
+          System.out.println("Request : " + request_string + " from " + client_remote_address);
+
           Event ev = HTTPParser.parse(client,key,request_string);
           System.out.println("Parse Complete");
           EVENT_QUEUE.push(ev);
@@ -85,24 +88,24 @@ public class MainServer {
     try{
       ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
       buffer.clear();
-      //TODO : timeout?
+      //TODO : timeout? read only once or multiple times?
+      // SM thinks : while-reading makes broken pipe errors!
 
-      while(true){
+//      while(true){
         int bytes_read = client.read(buffer);
         //System.out.println("buffer reading..." + bytes_read);
 
         //exit conditions
-        if(bytes_read == 0){
-          break;
-        }
+//        if(bytes_read == 0){
+//
+//        }
         if(bytes_read == -1){//client finished sending
-          //System.out.println("closing the channel...");
+          System.out.println(client);
+          System.out.println("closing the channel...");
           client.close();
-          break;
+//          break;
         }
-      }
-
-
+//      }
 
       /** produce string from buffer */
       byte[] bytes = new byte[buffer.position()];

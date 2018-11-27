@@ -44,9 +44,6 @@ public class HTTPParser {
       method = parsed_first_line[0];
       uri = parsed_first_line[1];
       http_version = parsed_first_line[2];
-//      System.out.println(method);
-//      System.out.println(uri);
-//      System.out.println(http_version);
 
       if(!is_supported_method(method)){//unsupported method : 501
         return new Event(client, key, 501);
@@ -74,7 +71,7 @@ public class HTTPParser {
           return new Event(client, key, 400);
         }
 
-        String header_name = header_line.substring(0,colon_index);
+        String header_name = header_line.substring(0,colon_index).toLowerCase();
         String header_content = header_line.substring(colon_index+1);
 
         //TODO : duplicate header? e.g. Range...
@@ -104,7 +101,7 @@ public class HTTPParser {
     catch(Exception ex){
       ex.printStackTrace();
 
-      return new Event(client, key, 400);//bad request
+      return new Event(client, key, 500);// internal server error
     }
   }
 }

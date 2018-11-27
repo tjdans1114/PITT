@@ -114,51 +114,57 @@ public class HTTPInterpreter{
     SelectionKey key = http_request.key;
 
     TreeMap<String,String> header_map = new TreeMap<String,String>();
-    ByteBuffer body = ByteBuffer.allocate(Global.BUFFER_SIZE);
+    //ByteBuffer body = ByteBuffer.allocate(Global.BUFFER_SIZE);
 
     int status_code = http_request.error_code;
     String status_str = Global.http_status_map.get(status_code);
     String http_version = "HTTP/1.1";
 
-    String first_line = status_code + " " + status_str + " " + http_version;
+    //1. first line
+    String first_line = http_version + " " + status_code + " " + status_str;
 
+    //2. header
+    String header = "";//TODO
 
-    //TODO : header & body
-    //TODO : study how to use ByteBuffer!!!!!!!
-    //first line + header
-    header_map.put("a","b");
+    //3. body
+    String body = Global.ERROR_HTML_MAP.get(status_code);
 
-    return first_line;//TODO header & body
+    //TODO header
+    return first_line + "\n" +
+            header + "\n" +
+            body;
   }
 
   public static Event respond(Event http_request, EventQueue EVENT_QUEUE){
-    System.out.println("respond responding...");
-    System.out.println(http_request.error_code);
+    //TODO : add last-modified header to the response
+    //System.out.println("respond responding...");
+    //System.out.println(http_request.error_code);
     Event.Type type = http_request.type;
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
 
-    ByteBuffer buffer = ByteBuffer.allocate(0);
     try{
       if(type == Event.Type.NON_IO){
-        System.out.println("NON IO TYPE");
+        //System.out.println("NON IO TYPE");
+        ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
         String response_str = create_response_NON_IO(http_request);
-        //System.out.println(response_str);
+        System.out.println(response_str);
         buffer.put(response_str.getBytes());
 
+        buffer.flip();
         while(buffer.hasRemaining()){ //TODO : temporarily, write to client with while loop
           int x = client.write(buffer);
         }
 
-        String connection = http_request.connection;
+        //String connection = http_request.connection;
         handle_connection(http_request);
       }
       else if(type == Event.Type.CONTINUATION){
-        System.out.println("CONTINUATION TYPE");
-        System.out.println("THREADING START");
+        //System.out.println("CONTINUATION TYPE");
+        //System.out.println("THREADING START");
         //TODO : cache maintenance
 
-        int thread_num = free_thread();
+        int thread_num = get_free_thread();
         if(thread_num != -1){
           THREAD_POOL[thread_num] = true;
           FileThread f = new FileThread(thread_num, http_request, EVENT_QUEUE);
@@ -166,23 +172,33 @@ public class HTTPInterpreter{
           THREAD_POOL[thread_num] = false;
         }
         else{
-          System.out.println("Thread full, reenqueueing to the queue");
+          System.out.println("Thread full, re-enqueueing to the queue");
           EVENT_QUEUE.push(http_request);
         }
         return null;
       }
       //io
       else if(type == Event.Type.IO){
-        System.out.println("IO TYPE");
+        //System.out.println("IO TYPE");
         //cacheing
         if(Cache.has(http_request.uri)){
-          buffer = Cache.get(http_request.uri); //TODO : copy not aliasing
+          //TODO : cache maintenance & verification of code behavior
+
+          //1. write first line, headers
+          String first_line = "HTTP/1.1 200 OK";//TODO
+          String headers = "";//TODO
+
+          ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+          firstline_header_buffer.put((first_line + "\n" + headers + "\n\n").getBytes());
+
+          client.write(firstline_header_buffer);
+
+          ByteBuffer body_buffer = Cache.get(http_request.uri); //TODO : copy not aliasing
+          client.write(body_buffer);
         }
         else{
-          System.out.println("THREADING START");
-          //TODO : cache maintenance
-
-          int thread_num = free_thread();
+          //System.out.println("THREADING START");
+          int thread_num = get_free_thread();
           if(thread_num != -1){
             THREAD_POOL[thread_num] = true;
             FileThread f = new FileThread(thread_num, http_request, EVENT_QUEUE);
@@ -199,12 +215,13 @@ public class HTTPInterpreter{
     }
     catch(Exception ex){
       //TODO
+      ex.printStackTrace();
     }
 
     return null;
   }
 
-  private static int free_thread(){//if unavailable, return -1
+  private static int get_free_thread(){//if unavailable, return -1
     for(int i=0;i<THREAD_POOL.length;i++){
       if(THREAD_POOL[i] == false){
         return i;
@@ -230,11 +247,11 @@ public class HTTPInterpreter{
           return true;
         }
       }
-      catch(ParseException pe){// or other exception
+      catch(Exception ex){// or other exception
+        ex.printStackTrace();
         // date format invalid.
         // ignore if-modified-since header?
         // or make this 400
-
       }
     }
 
@@ -242,7 +259,7 @@ public class HTTPInterpreter{
     return false;
   }
 
-  private static void handle_connection(Event http_request){
+  public static void handle_connection(Event http_request){
     //TODO : twisted logic... i don't know
     Event.Type type = http_request.type;
     if(!(type == Event.Type.IO || type == Event.Type.NON_IO)){
@@ -263,6 +280,7 @@ public class HTTPInterpreter{
     }
     catch(IOException ex){
       //TODO
+      ex.printStackTrace();
     }
 
   }
@@ -277,7 +295,6 @@ class FileThread extends Thread{
   EventQueue event_queue;
   FileChannel errorChannel;
   File file;
- // MappedByteBuffer buffer_file; //buffer file of error 400, 404, 405
 
   public FileThread(int thread_number, Event event, EventQueue event_queue){
     this.thread_number = thread_number;
@@ -288,18 +305,48 @@ class FileThread extends Thread{
 
   //additional test conducted : see for change
   public void run(){
-    //TODO
+    //TODO :
     THREAD_COUNT++; //manage counter
 
     //System.out.println("IO Thread : " + thread_number + " Start");
+    SocketChannel client = event.client;
+
     /** NAHYUNSOO : do it ! ********************************************************************/
+    try {
+      if (event.type == Event.Type.CONTINUATION) {
+        //TODO : continuation case
+      }
+      else if (event.type == Event.Type.IO) {
+        //TODO : IO case
+        /** 1. open file from event */
+        String filename = event.uri.substring(1);
+        this.file = new File(filename);
+        int read_start, read_end; // read range
 
-    /** 1. open file from event */
-    String filename = event.uri.substring(1); 
-    this.file = new File(filename);
-    ByteBuffer buffer = null;
-    int read_start, read_end; // read range
+        //1. 404
+        if (!file.exists()) {
+          //TODO : this part & 304 part with NON_IO may be reduced to some 'write_error_to_client' function...
+          ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+          event.error_code = 404;
+          String response_str = HTTPInterpreter.create_response_NON_IO(event);
+          System.out.println(response_str);
+          buffer.put(response_str.getBytes());
 
+
+          buffer.flip();
+          while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+//            System.out.println(client);
+//            System.out.println(client.isOpen()?"client is open" : "client is not open");
+//            System.out.println(client.isConnected()?"client is connected" : "client is not connected");
+            int x = client.write(buffer);
+            System.out.println(x + " bytes");
+          }
+
+//          String connection = http_request.connection;
+          HTTPInterpreter.handle_connection(event);
+        }
+
+<<<<<<< HEAD
     //1. 404
     if(!file.exists()){
       //404
@@ -309,6 +356,38 @@ class FileThread extends Thread{
     //2. 304
     if(try304(http_request,file)){
       
+=======
+        //2. 304
+        else if (HTTPInterpreter.try304(event, file)){
+          ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+          event.error_code = 304;
+          String response_str = HTTPInterpreter.create_response_NON_IO(event);
+          System.out.println(response_str);
+          buffer.put(response_str.getBytes());
+
+          buffer.flip();
+          while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+            int x = client.write(buffer);
+          }
+
+          //String connection = http_request.connection;
+          HTTPInterpreter.handle_connection(event);
+        }
+        else{
+          //TODO : main part, maybe with cache maintenance
+          // TODO : NA HYUN SOO
+
+
+        }
+      }
+      else {
+        //error case
+        return;
+      }
+    }
+    catch(IOException ex){
+      ex.printStackTrace();
+>>>>>>> 25a38047b801a6a4d27745c7676855cca70e8efa
     }
 
     //not 404 nor 304
@@ -410,15 +489,9 @@ class FileThread extends Thread{
     } else {
     return false;
     }*/
-    System.out.println("IO Thread" + thread_number+ "End");
+    System.out.println("IO Thread " + thread_number+ " End");
 
     /************************************************************************/
     THREAD_COUNT--; //manage counter
   }
 }
-
-//byte[] bytes = new byte[buffer.position()];
-//buffer.flip();
-//buffer.get(bytes);
-//System.out.println("response buffer is : " + new String(bytes));
-//System.out.println(http_request.http_version.length());

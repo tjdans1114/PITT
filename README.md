@@ -101,3 +101,5 @@ EventLoop : Thread-using class. process events from EQ.dQ
   >Basically, the rule is: <p>
   >HTTP 501 for methods we don't recognize <p>
   >HTTP 405 for methods we don't recognize for one particular resource. <p>
+
+  - once the socketchannel is closed, it never will be recovered
