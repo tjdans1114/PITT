@@ -10,7 +10,7 @@ public class HTTPInterpreter{
   //TODO : interpret parsed Event
   private static final boolean THREAD_POOL[] = new boolean[FileThread.THREAD_MAX];
 
-//  public static Response create_response(Event http_request){
+//  public static 1 create_response(Event http_request){
 //    //only for NON_IO, (IO?)
 //    System.out.println("creating response");
 //    SocketChannel client = http_request.client;
@@ -142,9 +142,15 @@ public class HTTPInterpreter{
     Event.Type type = http_request.type;
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
-
+    Event new_event = null;
     try{
-      if(type == Event.Type.NON_IO){
+      if (type == Event.Type.FINISHED){
+        //System.out.println("Finished IO Job");
+        http_request.header_map.put("Connection", "Close");
+        handle_connection(http_request);
+      }
+
+      else if(type == Event.Type.NON_IO){
         //System.out.println("NON IO TYPE");
         ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
         String response_str = create_response_NON_IO(http_request);
@@ -158,6 +164,9 @@ public class HTTPInterpreter{
 
         //String connection = http_request.connection;
         handle_connection(http_request);
+        //////
+        new_event = Event(client, key); //finished
+        return new_event;
       }
       else if(type == Event.Type.CONTINUATION){
         //System.out.println("CONTINUATION TYPE");
@@ -168,13 +177,15 @@ public class HTTPInterpreter{
         if(thread_num != -1){
           THREAD_POOL[thread_num] = true;
           FileThread f = new FileThread(thread_num, http_request, EVENT_QUEUE);
-          f.start();
+          new_event = f.start();
           THREAD_POOL[thread_num] = false;
+          return new_event;
         }
         else{
           System.out.println("Thread full, re-enqueueing to the queue");
-          EVENT_QUEUE.push(http_request);
+          return http_request;
         }
+        System.out.println("Error in Continuation : Threading");
         return null;
       }
       //io
@@ -190,10 +201,12 @@ public class HTTPInterpreter{
 
           ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
           firstline_header_buffer.put((first_line + "\n" + headers + "\n\n").getBytes());
+          firstline_header_buffer.flip();
 
           client.write(firstline_header_buffer);
 
           ByteBuffer body_buffer = Cache.get(http_request.uri); //TODO : copy not aliasing
+          body_buffer.flip();
           client.write(body_buffer);
         }
         else{
@@ -211,11 +224,31 @@ public class HTTPInterpreter{
           }
           return null;
         }
+        else {
+
+        }
       }
     }
     catch(Exception ex){
-      //TODO
       ex.printStackTrace();
+      ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+      event.error_code = 500;
+      String response_str = HTTPInterpreter.create_response_NON_IO(event);
+      System.out.println(response_str);
+      buffer.put(response_str.getBytes());
+
+      buffer.flip();
+      
+
+      while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+        int x = client.write(buffer);
+      }
+
+      //String connection = http_request.connection;
+      HTTPInterpreter.handle_connection(event);
+      new_event = Event(client, key); //Finished
+      return new_event;
+
     }
 
     return null;
@@ -281,6 +314,23 @@ public class HTTPInterpreter{
     catch(IOException ex){
       //TODO
       ex.printStackTrace();
+      ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+      event.error_code = 500;
+      String response_str = HTTPInterpreter.create_response_NON_IO(event);
+      System.out.println(response_str);
+      buffer.put(response_str.getBytes());
+
+      buffer.flip();
+      
+
+      while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+        int x = client.write(buffer);
+      }
+
+      //String connection = http_request.connection;
+      HTTPInterpreter.handle_connection(event);
+      new_event = Event(client, key); //Finished
+      return new_event;
     }
 
   }
@@ -304,25 +354,47 @@ class FileThread extends Thread{
   }
 
   //additional test conducted : see for change
-  public void run(){
+  public Event run(){
     //TODO :
     THREAD_COUNT++; //manage counter
-
+    Event new_event;
     //System.out.println("IO Thread : " + thread_number + " Start");
     SocketChannel client = event.client;
-
+    SelectionKey key = event.key;
     /** NAHYUNSOO : do it ! ********************************************************************/
     try {
+      int read_start, read_end; // read range
+      //Continuation
       if (event.type == Event.Type.CONTINUATION) {
-        //TODO : continuation case
+        read_start = event.start;
+        FileChannel input_channel = event.file_channel;
+        if ((file.length()-read_start > Global.BUFFER_SIZE){ // goes in from start IO
+          buffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, Global.BUFFER_SIZE);
+          read_start += Global.BUFFER_SIZE;
+          new_event = Event(client, key, input_channel, start, "Keep Alive");
+        }
+        else{
+          buffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, read_end-read_start+1);
+          new_event = Event(client, key); //Finished
+        }
+        
+        buffer.flip();
+
+        while(buffer.hasRemaining()){
+          int x = client.write(buffer);
+        }
+        
+        Cache.set(event.uri, buffer);
+        //String connection = http_request.connection;
+        HTTPInterpreter.handle_connection(event);
+        return new_event;
       }
       else if (event.type == Event.Type.IO) {
         //TODO : IO case
         /** 1. open file from event */
+        
         String filename = event.uri.substring(1);
         this.file = new File(filename);
-        int read_start, read_end; // read range
-
         //1. 404
         if (!file.exists()) {
           //TODO : this part & 304 part with NON_IO may be reduced to some 'write_error_to_client' function...
@@ -332,8 +404,9 @@ class FileThread extends Thread{
           System.out.println(response_str);
           buffer.put(response_str.getBytes());
 
-
           buffer.flip();
+          
+
           while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
 //            System.out.println(client);
 //            System.out.println(client.isOpen()?"client is open" : "client is not open");
@@ -344,19 +417,9 @@ class FileThread extends Thread{
 
 //          String connection = http_request.connection;
           HTTPInterpreter.handle_connection(event);
+          new_event = Event(client, key); //Finished
         }
 
-<<<<<<< HEAD
-    //1. 404
-    if(!file.exists()){
-      //404
-      event.error_code = 404;
-    }
-
-    //2. 304
-    if(try304(http_request,file)){
-      
-=======
         //2. 304
         else if (HTTPInterpreter.try304(event, file)){
           ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
@@ -366,129 +429,110 @@ class FileThread extends Thread{
           buffer.put(response_str.getBytes());
 
           buffer.flip();
+          
+
           while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
             int x = client.write(buffer);
           }
-
+          
           //String connection = http_request.connection;
           HTTPInterpreter.handle_connection(event);
+          new_event = Event(client, key); //Finished
         }
+        //3. 200
         else{
-          //TODO : main part, maybe with cache maintenance
-          // TODO : NA HYUN SOO
+          read_start = 0;
+          read_end = file.size() -1;
+          ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+          FileChannel input_channel = new FileInputStream(filename).getChannel();
+          if ((file.length()-read_start > Global.BUFFER_SIZE){ // goes in from start IO
+            buffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, Global.BUFFER_SIZE);
+            read_start += Global.BUFFER_SIZE;
+            new_event = Event(client, key, input_channel, start, "Keep Alive");//Continue
+          }
+          else{
+            buffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, read_end-read_start+1);
+            new_event = Event(client, key); //Finished
+            event_queue.push(new_event);
+          }
 
+          //ByteBuffer header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+          //event.error_code = 200;
+          //String response_str = HTTPInterpreter.create_response_NON_IO(event);
+          //System.out.println(response_str);
+          //header_buffer.put(response_str.getBytes());
 
+//         header_buffer.flip();
+//         header_buffer.rewind();
+
+          String first_line = "HTTP/1.1 200 OK";//TODO
+          String headers = "";//TODO
+
+          ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+          firstline_header_buffer.put((first_line + "\n" + headers + "\n\n").getBytes());
+
+          client.write(firstline_header_buffer);
+          
+          buffer.flip();
+          
+
+//          while (header_buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+//            int x = client.write(header_buffer);
+//          }
+
+          while(buffer.hasRemaining()){
+            int x = client.write(buffer);
+          }
+
+          Cache.set(event.uri, buffer);
+          //String connection = http_request.connection;
+          HTTPInterpreter.handle_connection(event);
+          return new_event;
         }
       }
-      else {
-        //error case
-        return;
+      else {//Error Case
+        //System.out.println("500 Service Unavailable");
+        ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+        event.error_code = 500;
+        String response_str = HTTPInterpreter.create_response_NON_IO(event);
+        System.out.println(response_str);
+        buffer.put(response_str.getBytes());
+
+        buffer.flip();
+        
+
+        while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+          int x = client.write(buffer);
+        }
+
+        //String connection = http_request.connection;
+        HTTPInterpreter.handle_connection(event);
+        new_event = Event(client, key); //Finished
+        return new_event;
       }
     }
     catch(IOException ex){
       ex.printStackTrace();
->>>>>>> 25a38047b801a6a4d27745c7676855cca70e8efa
+
+      ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+      event.error_code = 500;
+      String response_str = HTTPInterpreter.create_response_NON_IO(event);
+      System.out.println(response_str);
+      buffer.put(response_str.getBytes());
+
+      buffer.flip();
+      
+
+      while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
+        int x = client.write(buffer);
+      }
+
+      //String connection = http_request.connection;
+      HTTPInterpreter.handle_connection(event);
+      new_event = Event(client, key); //Finished
+      return new_event;
     }
 
-    //not 404 nor 304
-//  FileChannel inChannel;
-//  long marker = event.marker;
-//    //event.size = (int) inChannel.size(); // size of event
-//    //Cache.set(event.uri, buffer);
-//
-//    // first time io
-//  if (event.type==Event.Type.IO){
-//      //Mark that it is only read to certain point : call this marker
-//    inChannel = new FileInputStream(fileName).getChannel();
-//    if ((file.length()-marker > Global.BUFFER_SIZE){ // goes in from start IO
-//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, Global.BUFFER_SIZE);
-//
-//      marker += Global.BUFFER_SIZE;
-//      Event new_event = Event(client, key, inChannel, marker, "Keep Alive");
-//      event_queue.push(new_event);
-//    }
-//    else{
-//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, end-marker);
-//      Event new_event = Event(client, key); //Finished
-//      event_queue.push(new_event);
-//    }
-//  }
-//  else if (event.type==Event.Type.CONTINUATION){
-//    marker = event.start;
-//    inChannel = event.file_channel;
-//    if ((file.length()-marker > Global.BUFFER_SIZE){ // goes in from start IO
-//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, Global.BUFFER_SIZE);
-//      //Mark that it is only read to certain point : call this marker
-//      event.start += marker;
-//      event_queue.push(event);
-//    }
-//    else{
-//      buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, marker, end-marker);
-//      Event new_event = Event(client, key); //Finished
-//      event_queue.push(new_event);
-//    }
-//  }
-
-//    Cache.set(event.uri, buffer);
-//    //Need to return the range of file;
-//    body.put{
-//      buffer;
-//    }
-//    inChannel.close();
-//
-//
-//    //2. create response message buffer
-//
-//    //3.
-//    SocketChannel client = event.client;
-//    SelectionKey key = event.key;
-//    /*
-//    Consider Range : how much to return
-//    */
-//    try {
-//      if (buffer.hasRemaining()) {
-//        event_queue.push(new Event(client, key, buffer, event.connection));
-//      }
-//    // ProcessEvent(event);
-//
-//    /*
-//    has a data buffer : require return header
-//    header buffer.flip : get the last info;
-//    long size = header.flip.limit() + buffer.flip.limit();
-//    or
-//    long size = header.pos() + buffer.pos();
-//
-//    long input_size = client.write(data)
-//
-//    if (input_size < size){
-//    body.put(header);
-//    body.put(buffer);
-//    event.key.attach(event);
-//    }
-//    try {
-//    event.key.interestOps(SelectionKey.OP_WRITE);
-//    event.key.selector().wakeup();
-//    */
-//
-//    }
-//    catch(Exception e){//IOException | InterruptedException e
-//      System.out.println("error occurred! at : ");
-//      e.printStackTrace();
-//      event.key.attach(null);
-//      event.key.cancel();
-//      event.key.channel().close();
-//    }
-    /*
-    public boolean modified(Event event) throws IOException, InterruptedException {
-    File file = new File(event.uri.substring(1));
-    if (file.exists()) {
-    System.out.println("File Exist");
-    String date = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date(file.lastModified()));
-    event.header_map.put("If-Modified-Since", date);
-    return true;
-    } else {
-    return false;
-    }*/
     System.out.println("IO Thread " + thread_number+ " End");
 
     /************************************************************************/
