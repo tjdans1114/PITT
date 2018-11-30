@@ -1,5 +1,6 @@
 package PITT;
 
+import java.nio.channels.FileChannel;
 import java.util.*;
 import java.nio.file.*;
 
@@ -7,7 +8,7 @@ public class Global {
   public static final String IP = "127.0.0.1"; //localhost
   public static final int PORT = 1111;
 
-  public static final int BUFFER_SIZE = 1048576 * 2;//2MB
+  public static final int BUFFER_SIZE = 1048576 * 2/4;//2MB. temporarily 500kb
 
   public static final int HEADER_SIZE = 1024; // 1024 characters
 

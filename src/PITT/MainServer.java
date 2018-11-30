@@ -61,14 +61,14 @@ public class MainServer {
             continue;
           }
 
-          String client_remote_address = client.getRemoteAddress().toString();
+//          String client_remote_address = client.getRemoteAddress().toString();
           String request_string = read(client);
 
           //System.out.println("reading done");
           if(request_string == null || request_string.length() == 0){
             continue;
           }
-          System.out.println("Request : " + request_string + " from " + client_remote_address);
+//          System.out.println("Request : " + request_string + " from " + client_remote_address);
 
           Event ev = HTTPParser.parse(client,key,request_string);
           System.out.println("Parse Complete");
