@@ -45,11 +45,10 @@ public class HTTPInterpreter{
     Event.Type type = http_request.type;
     SocketChannel client = http_request.client;
     SelectionKey key = http_request.key;
-    Event new_event = null;
     try{
       if (type == Event.Type.FINISHED){
-        //System.out.println("Finished IO Job");
-        http_request.header_map.put("connection", "Close");
+        System.out.println("FINISHED processingggg...");
+        //http_request.header_map.put("connection", "Close");
         handle_connection(http_request);
         System.out.println("finished dequeued");
       }
@@ -67,7 +66,7 @@ public class HTTPInterpreter{
         }
 
         //String connection = http_request.connection;
-        handle_connection(http_request);
+        //handle_connection(http_request);
         //////
         return new Event(client, key); //finished
       }
@@ -85,9 +84,9 @@ public class HTTPInterpreter{
         }
         else{
           System.out.println("Thread full, re-enqueueing to the queue");
+          System.out.println("Error in Continuation : Threading");
           return http_request;
         }
-        System.out.println("Error in Continuation : Threading");
         return null;
       }
       //io
@@ -129,7 +128,7 @@ public class HTTPInterpreter{
       }
     }
     catch(Exception ex){
-//      ex.printStackTrace();
+      ex.printStackTrace();
 //      ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
 //      http_request.error_code = 500;
 //      String response_str = HTTPInterpreter.create_response_NON_IO(http_request);
@@ -194,26 +193,31 @@ public class HTTPInterpreter{
   }
 
   public static void handle_connection(Event http_request){
+    System.out.println("evaluating handle_connection");
+    System.out.println(http_request.type.toString());
     //TODO : twisted logic... i don't know
     Event.Type type = http_request.type;
-    if(!(type == Event.Type.IO || type == Event.Type.NON_IO)){
+    if(!(type == Event.Type.FINISHED)){
+//      System.out.println("1111111");
       return;
     }
-
+//    System.out.println("151515");
     SocketChannel client = http_request.client;
     //SelectionKey key = http_request.key;
-    if(http_request.header_map.containsKey("connection") &&
-            http_request.header_map.get("connection").equals("keep-alive")){
-      //TODO
-      return; //keep-alive!
-    }
-
+//    if(http_request.header_map.containsKey("connection") &&
+//            http_request.header_map.get("connection").equals("keep-alive")){
+//      System.out.println("222222");
+//      //TODO
+//      return; //keep-alive!
+//    }
+//    System.out.println("333333");
     //close
     try {
+      System.out.println("closing client : "+ client);
       client.close();
     }
     catch(IOException ex){
-
+      ex.printStackTrace();
     }
 
   }
@@ -291,6 +295,7 @@ class FileThread extends Thread{
             System.out.println("case 1");
             MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, Global.BUFFER_SIZE);
 
+            write(client,MBbuffer);
             event_queue.push(new Event(client, key, input_channel, Global.BUFFER_SIZE, "Keep Alive"));//Continue
           }
           else{//small file
@@ -298,13 +303,14 @@ class FileThread extends Thread{
             MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, input_channel.size());
             System.out.println("mapped buffer");
 
+            write(client,MBbuffer);
             event_queue.push(new Event(client, key));//Finished
           }
 
-          //Don't flip here!
-          while(MBbuffer.hasRemaining()){
-            int x = client.write(MBbuffer);
-          }
+//          //Don't flip here!
+//          while(MBbuffer.hasRemaining()){
+//            int x = client.write(MBbuffer);
+//          }
 
 //          Cache.set(event.uri, buffer);
 //          //String connection = http_request.connection;
@@ -318,25 +324,30 @@ class FileThread extends Thread{
         System.out.println("read start at : " + read_start);
         FileChannel input_channel = event.file_channel;
         if (input_channel.size() - read_start > Global.BUFFER_SIZE){ // goes in from start IO
+          System.out.println("case 1");
           MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, Global.BUFFER_SIZE);
           read_start += Global.BUFFER_SIZE;
 
+          write(client,MBbuffer);
           event_queue.push(new Event(client, key, input_channel, read_start, "Keep Alive"));
         }
         else{
+          System.out.println("case 2");
           MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, input_channel.size()-read_start);
 
+          write(client,MBbuffer);
           event_queue.push(new Event(client, key)); //Finished
         }
 
-//        MBbuffer.flip();
-        while(MBbuffer.hasRemaining()){
-          int x = client.write(MBbuffer);
-        }
+////        MBbuffer.flip();
+//        System.out.println(client.toString() + " in continuation writing");
+//        while(MBbuffer.hasRemaining()){
+//          int x = client.write(MBbuffer);
+//        }
 
         Cache.set(event.uri, MBbuffer);
         //String connection = http_request.connection;
-        HTTPInterpreter.handle_connection(event);
+        //HTTPInterpreter.handle_connection(event);
       }
       else {//Error Case
         //let's discard this
@@ -354,7 +365,7 @@ class FileThread extends Thread{
         }
 
         //String connection = http_request.connection;
-        HTTPInterpreter.handle_connection(event);
+        //HTTPInterpreter.handle_connection(event);
         event_queue.push(new Event(client, key)); //Finished
       }
     }
@@ -366,6 +377,12 @@ class FileThread extends Thread{
 
     /************************************************************************/
     THREAD_COUNT--; //manage counter
+  }
+
+  private static void write(SocketChannel client, ByteBuffer buffer) throws IOException {
+    while(buffer.hasRemaining()){
+      int x = client.write(buffer);
+    }
   }
 
   private static void write_error(Event event, EventQueue event_queue, int error_code) throws IOException{
@@ -385,7 +402,7 @@ class FileThread extends Thread{
     }
 
 //          String connection = http_request.connection;
-    HTTPInterpreter.handle_connection(event);
+    //HTTPInterpreter.handle_connection(event);
     event_queue.push(new Event(client, key)); //Finished
   }
 }
