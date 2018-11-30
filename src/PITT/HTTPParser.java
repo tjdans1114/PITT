@@ -56,7 +56,7 @@ public class HTTPParser {
       int header_length = 0;
       while(true){
         String header_line = reader.readLine();
-        if(header_line.length() == 0){
+        if(header_line == null || header_line.length() == 0){
           break;
         }
 

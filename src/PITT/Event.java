@@ -39,6 +39,8 @@ public class Event {
   public StringBuffer req_body;
 
   int error_code;
+  /////////////////////////////////////////
+  int content_length;
 
   /** Processed Headers */
   String connection;
@@ -112,5 +114,6 @@ public class Event {
     this.client = client;
     this.key = key;
     this.type = Type.FINISHED;
+    //this.header_map.put("Connection", "close");
   }
 }
