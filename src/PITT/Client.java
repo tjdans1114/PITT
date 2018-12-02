@@ -16,7 +16,7 @@ public class Client {
 
     //Test codes
     ArrayList<String> string_list = new ArrayList<String>();
-    string_list.add("GET /.gitignore HTTP/1.1\n");
+    string_list.add("GET /.gitignore HTTP/1.1\nconnectionasdf");
 //    string_list.add("test2");
 //    string_list.add("test3");
 //    string_list.add("test4");
@@ -30,9 +30,6 @@ public class Client {
 
       System.out.println("sending : " + string);
       buffer.clear();
-
-      // wait for 2 seconds before sending next message
-      //Thread.sleep(1000);
     }
 
     //Test codes end

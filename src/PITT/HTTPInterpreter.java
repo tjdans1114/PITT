@@ -115,8 +115,11 @@ public class HTTPInterpreter{
   }
 
   public static boolean try304(Event http_request, File file){//TODO : confirm logic
-    if(http_request.header_map.containsKey("If-Modified-Since")){//debug needed
-      String date_string = http_request.header_map.get("If-Modified-Since");
+    System.out.println("try 304......");
+    if(http_request.header_map.containsKey("if-modified-since")){//debug needed
+      System.out.println("try 304......222");
+
+      String date_string = http_request.header_map.get("if-modified-since");
       try{
         //parse request modified date
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
@@ -126,7 +129,9 @@ public class HTTPInterpreter{
         Date file_date = new Date(file.lastModified());
         //String file_date = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date(file.lastModified()));
 
+        System.out.println("try 304!");
         if(req_date.equals(file_date)){//does this work?
+          System.out.println("304 success!");
           return true;
         }
       }
@@ -209,15 +214,15 @@ class FileThread extends Thread{
           Date date = new Date(file.lastModified());
 
           if (Cache.has(event.uri, date)) {//cache hit
-            //System.out.println("cache hit!");
+            System.out.println("cache hit!");
             //1. write first line, headers
             String first_line = "HTTP/1.1 200 OK";
-            String headers = "";//TODO
+            String date_string = get_time_string(new Date(file.lastModified()));
+            String headers = "Last-Modified: " + date_string;
 
             ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
-            firstline_header_buffer.put((first_line + "\n" + headers + "\n").getBytes());
+            firstline_header_buffer.put((first_line + "\n" +  headers + "\n\n").getBytes());
             firstline_header_buffer.flip();
-
             client.write(firstline_header_buffer);
 
             ByteBuffer body_buffer = Cache.get(event.uri,date); //copy not aliasing
@@ -227,15 +232,17 @@ class FileThread extends Thread{
           }
           //4. 200 + cache fail
           else {//cache miss
-//            System.out.println("cache miss!");
+            System.out.println("cache miss!");
             String first_line = "HTTP/1.1" + " " + 200 + " " + "OK";
 
             //2. header
-            String header = "";//TODO
+            //String headers = "Content-Type: text/plain";//TODO
+            String date_string = get_time_string(new Date(file.lastModified()));
+            String headers = "Last-Modified: " + date_string;
 
             //TODO header
             String preprocess = first_line + "\n" +
-                    header + "\n";
+                    headers + "\n\n";
             ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
             firstline_header_buffer.put(preprocess.getBytes());
             firstline_header_buffer.flip();
@@ -248,15 +255,15 @@ class FileThread extends Thread{
             FileChannel input_channel = new FileInputStream(filename).getChannel();
 
             if (file.length() > Global.BUFFER_SIZE) { // large file
-//              System.out.println("case 1");
+              System.out.println("case 1");
               MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, Global.BUFFER_SIZE);
 
               write(client, MBbuffer);
               event_queue.push(new Event(client, key, input_channel, Global.BUFFER_SIZE, "Keep Alive"));//Continue
             }
             else {//small file
+              System.out.println("case 2");
               MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, input_channel.size());
-              //System.out.println("mapped buffer");
 
               Cache.set(event.uri,MBbuffer,date);//maintain cache
 
@@ -268,6 +275,7 @@ class FileThread extends Thread{
         }
       }
       else if (event.type == Event.Type.CONTINUATION) {
+        System.out.println("case CONT");
         MappedByteBuffer MBbuffer;
 
         read_start = event.start;
@@ -283,6 +291,9 @@ class FileThread extends Thread{
         else{
           MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, input_channel.size()-read_start);
 
+          System.out.println(client.isOpen()?"open":"not open");
+          System.out.println(client.isConnected()?"connected":"not connected");
+          System.out.println(client.toString());
           write(client,MBbuffer);
           event_queue.push(new Event(client, key)); //Finished
         }
@@ -321,7 +332,6 @@ class FileThread extends Thread{
   private static void write_error(Event event, EventQueue event_queue, int error_code) throws IOException{
     SocketChannel client = event.client;
     SelectionKey key = event.key;
-    //TODO : this part & 304 part with NON_IO may be reduced to some 'write_error_to_client' function...
     ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
     event.error_code = error_code;
     String response_str = HTTPInterpreter.create_response_NON_IO(event);
@@ -334,5 +344,12 @@ class FileThread extends Thread{
 //          String connection = http_request.connection;
     //HTTPInterpreter.handle_connection(event);
     event_queue.push(new Event(client, key)); //Finished
+  }
+
+  private static String get_time_string(Date date){
+    SimpleDateFormat sdf =
+            new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+    sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+    return sdf.format(date);
   }
 }

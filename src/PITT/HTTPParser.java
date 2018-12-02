@@ -67,12 +67,14 @@ public class HTTPParser {
 
         //header line is parsed by colon
         int colon_index = header_line.indexOf(':');
-        if(colon_index == -1){
+        if(colon_index == -1 || colon_index + 1 == header_line.length()){
           return new Event(client, key, 400);
         }
 
         String header_name = header_line.substring(0,colon_index).toLowerCase();
-        String header_content = header_line.substring(colon_index+1);
+        String header_content = header_line.substring(colon_index+2);
+        // System.out.println(header_name);
+        // System.out.println(header_content);
 
         //TODO : duplicate header? e.g. Range...
         header_map.put(header_name,header_content);

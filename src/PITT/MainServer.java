@@ -70,6 +70,7 @@ public class MainServer {
           }
 //          System.out.println("Request : " + request_string + " from " + client_remote_address);
 
+          System.out.println(request_string);
           Event ev = HTTPParser.parse(client,key,request_string);
 //          System.out.println("Parse Complete");
           EVENT_QUEUE.push(ev);
@@ -101,7 +102,7 @@ public class MainServer {
 //        }
         if(bytes_read == -1){//client finished sending
 //          System.out.println(client);
-//          System.out.println("closing the channel...");
+          System.out.println("read finished : closing the channel... " + client);
           client.close();
 //          break;
         }
