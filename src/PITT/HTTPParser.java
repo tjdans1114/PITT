@@ -35,7 +35,7 @@ public class HTTPParser {
 
       /** 1. parse first line : method ,uri, http_version */
       String first_line = reader.readLine();
-      System.out.println("first line is : "+ first_line);
+//      System.out.println("first line is : "+ first_line);
 
       String[] parsed_first_line = first_line.split(space);
       if(parsed_first_line.length != 3){

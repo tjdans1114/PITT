@@ -10,7 +10,7 @@
  - 헤더 처리 (connection, last-modified)
  - ~~socket close 제대로 하기~~
  - uri access 제한
- - Cache : memory 제한 필요
+ - ~~Cache : memory 제한 필요~~
  - read buffer 확장, request timeout
  - Task의 결과가 새로운 event로 공급되어 event loop내에서 처리되도록 구현 (양방향 통신)
  - Benchmarking
@@ -36,7 +36,7 @@ Refer to Issue #1
   - ~~Main server execution? : until 11/23~~ at 11/30
   - debugging : until 11/30
 * Step 3
-  - Cacheing : until 12/7?
+  - ~~Cacheing : until 12/7?~~
   - Benchmark : until 12/7?
 
 

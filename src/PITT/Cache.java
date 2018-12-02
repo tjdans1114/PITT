@@ -49,18 +49,17 @@ public class Cache {
 //  }
 
   public static void set(String uri, ByteBuffer data, Date date) {
-    //1. check if the bytebuffer size is small enough
-    if(data.capacity() > capacity){
-      return;
-    }
-
-    if(data == null) {//2. file is removed in server!
+    if(data == null) {//1. file is removed in server!
       cache.remove(uri);
       return;
     }
 
+    //2. check if the bytebuffer size is small enough
+    if(data.capacity() > capacity){
+      return;
+    }
+
     if(!cache.containsKey(uri)){//cache has no file matching uri
-      //없으면
       if(current_size < cache_size){
         cache.put(uri,new CachePair(date,data.duplicate()));
         current_size++;
@@ -71,15 +70,9 @@ public class Cache {
       }
     }
     else {
-      //있으면
       Date cache_date = cache.get(uri).date;
-      if(cache_date.equals(date)){//같은 날짜면
-        System.out.println("same date...");
-        //pass
-      }
-      else{
-        System.out.println("diff date...");
-        //다른 날짜면
+      if(!cache_date.equals(date)){//different date
+        //System.out.println("diff date...");
         //replace
         cache.remove(uri);
         cache.put(uri,new CachePair(date,data.duplicate()));
@@ -88,6 +81,7 @@ public class Cache {
   }
 
   public static void removefirst() {
+    //TODO : improve performance?
     //Key at the first location
     String first_key = (String)cache.keySet().toArray()[cache.size()-1]; // O(N)
 

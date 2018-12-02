@@ -21,9 +21,9 @@ public class EventLoop extends Thread {
       Event event = event_queue.pop();
 
       //TODO
-      System.out.println("responding...");
+//      System.out.println("responding...");
       Event cont = HTTPInterpreter.respond(event,event_queue);
-      System.out.println("respond complete");
+//      System.out.println("respond complete");
       //System.out.println("run");
 
       if(cont != null){

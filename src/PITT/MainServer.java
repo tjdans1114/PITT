@@ -71,9 +71,9 @@ public class MainServer {
 //          System.out.println("Request : " + request_string + " from " + client_remote_address);
 
           Event ev = HTTPParser.parse(client,key,request_string);
-          System.out.println("Parse Complete");
+//          System.out.println("Parse Complete");
           EVENT_QUEUE.push(ev);
-          System.out.println("Parsed event enqueued");
+//          System.out.println("Parsed event enqueued");
         }
         else if(key.isWritable()){
           //TODO : NOTHING!!!
@@ -100,8 +100,8 @@ public class MainServer {
 //
 //        }
         if(bytes_read == -1){//client finished sending
-          System.out.println(client);
-          System.out.println("closing the channel...");
+//          System.out.println(client);
+//          System.out.println("closing the channel...");
           client.close();
 //          break;
         }
