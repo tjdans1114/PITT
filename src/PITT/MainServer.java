@@ -4,7 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
+import java.sql.Time;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 public class MainServer {
   public static EventQueue EVENT_QUEUE = new EventQueue();
@@ -62,18 +64,25 @@ public class MainServer {
           }
 
 //          String client_remote_address = client.getRemoteAddress().toString();
-          String request_string = read(client);
+          try{
+            String request_string = read(client);
 
-          //System.out.println("reading done");
-          if(request_string == null || request_string.length() == 0){
-            continue;
-          }
+            //System.out.println("reading done");
+            if(request_string == null || request_string.length() == 0){
+              continue;
+            }
 //          System.out.println("Request : " + request_string + " from " + client_remote_address);
 
-          System.out.println(request_string);
-          Event ev = HTTPParser.parse(client,key,request_string);
+            System.out.println(request_string);
+            Event ev = HTTPParser.parse(client,key,request_string);
 //          System.out.println("Parse Complete");
-          EVENT_QUEUE.push(ev);
+            EVENT_QUEUE.push(ev);
+
+          }
+          catch(TimeoutException tex){
+            EVENT_QUEUE.push(new Event(client,key,408));
+          }
+
 //          System.out.println("Parsed event enqueued");
         }
         else if(key.isWritable()){
@@ -85,28 +94,33 @@ public class MainServer {
     }
   }
 
-  static String read(SocketChannel client){
+  static String read(SocketChannel client) throws TimeoutException{
     try{
       ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
       buffer.clear();
       //TODO : timeout? read only once or multiple times?
-      // SM thinks : while-reading makes broken pipe errors!
 
-//      while(true){
+      long start_time = System.currentTimeMillis();
+
+      while(true){//verification required
         int bytes_read = client.read(buffer);
         //System.out.println("buffer reading..." + bytes_read);
+        long current_time = System.currentTimeMillis();
+        if(current_time - start_time > Global.TIMEOUT){
+          throw new TimeoutException();
+        }
 
         //exit conditions
-//        if(bytes_read == 0){
-//
-//        }
+        if(bytes_read == 0){
+          break;
+        }
         if(bytes_read == -1){//client finished sending
 //          System.out.println(client);
           System.out.println("read finished : closing the channel... " + client);
           client.close();
-//          break;
+          break;
         }
-//      }
+      }
 
       /** produce string from buffer */
       byte[] bytes = new byte[buffer.position()];
@@ -118,8 +132,13 @@ public class MainServer {
       //buffer.rewind();
       //return StandardCharsets.UTF_8.decode(buffer).toString();
     }
+    catch(TimeoutException tex){
+      throw new TimeoutException("TODO");
+    }
     catch(Exception ex){
+      //TODO : more exception handlings?
       return null;
+
     }
   }
 }

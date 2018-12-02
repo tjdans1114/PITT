@@ -11,7 +11,7 @@
  - ~~socket close 제대로 하기~~
  - uri access 제한
  - ~~Cache : memory 제한 필요~~
- - read buffer 확장, request timeout
+ - read buffer 확장, ~~request timeout~~
  - Task의 결과가 새로운 event로 공급되어 event loop내에서 처리되도록 구현 (양방향 통신)
  - Benchmarking
     - node js server 구축
