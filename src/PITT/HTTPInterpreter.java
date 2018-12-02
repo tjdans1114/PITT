@@ -65,16 +65,9 @@ public class HTTPInterpreter{
           int x = client.write(buffer);
         }
 
-        //String connection = http_request.connection;
-        //handle_connection(http_request);
-        //////
         return new Event(client, key); //finished
       }
       else if(type == Event.Type.CONTINUATION){
-        //System.out.println("CONTINUATION TYPE");
-        //System.out.println("THREADING START");
-        //TODO : cache maintenance
-
         int thread_num = get_free_thread();
         if(thread_num != -1){
           THREAD_POOL[thread_num] = true;
@@ -84,34 +77,12 @@ public class HTTPInterpreter{
         }
         else{
           System.out.println("Thread full, re-enqueueing to the queue");
-          System.out.println("Error in Continuation : Threading");
           return http_request;
         }
         return null;
       }
       //io
       else if(type == Event.Type.IO){
-        //System.out.println("IO TYPE");
-        //cacheing
-        if(Cache.has(http_request.uri)){
-          //TODO : cache maintenance & verification of code behavior
-
-          //1. write first line, headers
-          String first_line = "HTTP/1.1 200 OK";//TODO
-          String headers = "";//TODO
-
-          ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
-          firstline_header_buffer.put((first_line + "\n" + headers + "\n\n").getBytes());
-          firstline_header_buffer.flip();
-
-          client.write(firstline_header_buffer);
-
-          ByteBuffer body_buffer = Cache.get(http_request.uri); //TODO : copy not aliasing
-          body_buffer.flip();
-          client.write(body_buffer);
-        }
-        else{
-          //System.out.println("THREADING START");
           int thread_num = get_free_thread();
           if(thread_num != -1){
             THREAD_POOL[thread_num] = true;
@@ -125,30 +96,9 @@ public class HTTPInterpreter{
           }
           return null;
         }
-      }
     }
     catch(Exception ex){
       ex.printStackTrace();
-//      ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
-//      http_request.error_code = 500;
-//      String response_str = HTTPInterpreter.create_response_NON_IO(http_request);
-//      System.out.println(response_str);
-//      buffer.put(response_str.getBytes());
-//
-//      buffer.flip();
-//
-//      try {
-//        while (buffer.hasRemaining()) { //TODO : temporarily, write to client with while loop
-//          int x = client.write(buffer);
-//        }
-//      }
-//      catch(Exception exx){
-//        exx.printStackTrace();
-//      }
-//
-//      //String connection = http_request.connection;
-//      HTTPInterpreter.handle_connection(http_request);
-//      return new Event(client, key); //Finished
     }
 
     return null;
@@ -193,25 +143,14 @@ public class HTTPInterpreter{
   }
 
   public static void handle_connection(Event http_request){
-    System.out.println("evaluating handle_connection");
-    System.out.println(http_request.type.toString());
-    //TODO : twisted logic... i don't know
+    //TODO :
     Event.Type type = http_request.type;
     if(!(type == Event.Type.FINISHED)){
-//      System.out.println("1111111");
       return;
     }
-//    System.out.println("151515");
+
     SocketChannel client = http_request.client;
-    //SelectionKey key = http_request.key;
-//    if(http_request.header_map.containsKey("connection") &&
-//            http_request.header_map.get("connection").equals("keep-alive")){
-//      System.out.println("222222");
-//      //TODO
-//      return; //keep-alive!
-//    }
-//    System.out.println("333333");
-    //close
+
     try {
       System.out.println("closing client : "+ client);
       client.close();
@@ -252,7 +191,7 @@ class FileThread extends Thread{
       int read_start, read_end =0;
 
       if (event.type == Event.Type.IO) {
-        System.out.println("IO");
+//        System.out.println("IO");
         //TODO : IO case
         /** 1. open file from event */
         
@@ -261,60 +200,85 @@ class FileThread extends Thread{
         //1. 404
         if (!file.exists()) {
           write_error(event,event_queue,404);
+          //TODO : cache set
+          Cache.set(event.uri,null, null); // erase from the cache
         }
-
         //2. 304
         else if (HTTPInterpreter.try304(event, file)){
           write_error(event,event_queue,304);
         }
-        //3. 200
-        else{
-          String first_line = "HTTP/1.1"+ " " + 200 + " " + "OK";
+        //3. 200 + cache try
+        else {
+          Date date = new Date(file.lastModified());
 
-          //2. header
-          String header = "";//TODO
+          if (Cache.has(event.uri, date)) {//cache hit
+            System.out.println("cache hit!");
+            //1. write first line, headers
+            String first_line = "HTTP/1.1 200 OK";
+            String headers = "";//TODO
 
-          //TODO header
-          String preprocess =  first_line + "\n" +
-                  header + "\n";
-          ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
-          firstline_header_buffer.put(preprocess.getBytes());
-          firstline_header_buffer.flip();
-          while(firstline_header_buffer.hasRemaining()){
+            ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+            firstline_header_buffer.put((first_line + "\n" + headers + "\n").getBytes());
+            firstline_header_buffer.flip();
+
             client.write(firstline_header_buffer);
-          }
 
-          System.out.println("200 SENDING....");
-          System.out.println(file.getName() + " : file length!");
+            ByteBuffer body_buffer = Cache.get(event.uri,date); //copy not aliasing
 
-          MappedByteBuffer MBbuffer;
-
-          FileChannel input_channel = new FileInputStream(filename).getChannel();
-
-          if (file.length() > Global.BUFFER_SIZE){ // large file
-            System.out.println("case 1");
-            MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, Global.BUFFER_SIZE);
-
-            write(client,MBbuffer);
-            event_queue.push(new Event(client, key, input_channel, Global.BUFFER_SIZE, "Keep Alive"));//Continue
-          }
-          else{//small file
-            System.out.println("case 2");
-            MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, input_channel.size());
-            System.out.println("mapped buffer");
-
-            write(client,MBbuffer);
+            write(client,body_buffer);
             event_queue.push(new Event(client, key));//Finished
           }
+          //4. 200 + cache fail
+          else {//cache miss
+            System.out.println("cache miss!");
+            String first_line = "HTTP/1.1" + " " + 200 + " " + "OK";
+
+            //2. header
+            String header = "";//TODO
+
+            //TODO header
+            String preprocess = first_line + "\n" +
+                    header + "\n";
+            ByteBuffer firstline_header_buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
+            firstline_header_buffer.put(preprocess.getBytes());
+            firstline_header_buffer.flip();
+            while (firstline_header_buffer.hasRemaining()) {
+              client.write(firstline_header_buffer);
+            }
+
+            MappedByteBuffer MBbuffer;
+
+            FileChannel input_channel = new FileInputStream(filename).getChannel();
+
+            if (file.length() > Global.BUFFER_SIZE) { // large file
+//              System.out.println("case 1");
+              MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, Global.BUFFER_SIZE);
+
+              write(client, MBbuffer);
+              event_queue.push(new Event(client, key, input_channel, Global.BUFFER_SIZE, "Keep Alive"));//Continue
+            }
+            else {//small file
+//              System.out.println("case 2");
+              MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, input_channel.size());
+              System.out.println("mapped buffer");
+
+              Cache.set(event.uri,MBbuffer,date);//maintain cache
+
+              write(client, MBbuffer);
+              event_queue.push(new Event(client, key));//Finished
+
+            }
 
 //          //Don't flip here!
 //          while(MBbuffer.hasRemaining()){
 //            int x = client.write(MBbuffer);
 //          }
 
+            //TODO : cache maintenance
 //          Cache.set(event.uri, buffer);
 //          //String connection = http_request.connection;
 //          HTTPInterpreter.handle_connection(event);
+          }
         }
       }
       else if (event.type == Event.Type.CONTINUATION) {
@@ -345,7 +309,6 @@ class FileThread extends Thread{
 //          int x = client.write(MBbuffer);
 //        }
 
-        Cache.set(event.uri, MBbuffer);
         //String connection = http_request.connection;
         //HTTPInterpreter.handle_connection(event);
       }
