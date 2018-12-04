@@ -47,14 +47,8 @@ public class Event {
   FileChannel file_channel; //entailed open file channel : for continuation
   int start; //file channel start position
 
-  //for 206
-  //int start, end; // position of data
-
   /**************************************************************************************/
   static final String crlf = "\r\n";
-  static final int BODY_LENGTH = 2 * 1024 * 1024;//2MB TODO?
-
-
 
   /** Constructors ************************************/
   // 1. constructor for NON_IO : i.e. errors

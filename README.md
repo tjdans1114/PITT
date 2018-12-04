@@ -8,6 +8,7 @@
 
 ## remaining works
  - 헤더 처리 (connection, ~~last-modified~~)
+   - handle_connection 수정하기
  - ~~socket close 제대로 하기~~
  - uri access 제한
  - ~~Cache : memory 제한 필요~~

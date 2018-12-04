@@ -9,7 +9,7 @@ public class HTTPParser {
 
 //  String[] supported_headers = {
 //          "Connection",
-//          "Range", //for streaming? TODO
+//
 //          "If-Modified-Since", //for cacheing?
 //  };
 
@@ -35,7 +35,6 @@ public class HTTPParser {
 
       /** 1. parse first line : method ,uri, http_version */
       String first_line = reader.readLine();
-//      System.out.println("first line is : "+ first_line);
 
       String[] parsed_first_line = first_line.split(space);
       if(parsed_first_line.length != 3){
@@ -78,19 +77,15 @@ public class HTTPParser {
 
         String header_name = header_line.substring(0,colon_index).toLowerCase();
         String header_content = header_line.substring(colon_index+2);
-        // System.out.println(header_name);
-        // System.out.println(header_content);
 
-        //TODO : duplicate header? e.g. Range...
         header_map.put(header_name,header_content);
       }
-      //deal with unsupported headers...?
 
       /** 3. body : now, the rest part is all body  */
       while(true){
         String body_line = reader.readLine();
-        if(body_line == null){//??
-          break;//end of request
+        if(body_line == null){
+          break;
         }
 
         body.append(body_line).append(Event.crlf);

@@ -49,7 +49,8 @@ public class Cache {
 //  }
 
   public static void set(String uri, ByteBuffer data, Date date) {
-    if(data == null) {//1. file is removed in server!
+    //1. file is removed from the server!
+    if(data == null) {
       cache.remove(uri);
       return;
     }
@@ -84,17 +85,8 @@ public class Cache {
     //TODO : improve performance?
     //Key at the first location
     String first_key = (String)cache.keySet().toArray()[cache.size()-1]; // O(N)
-
-//    ByteBuffer first_value = Cache.get(first_key);
     cache.remove(first_key);
   }
-//
-//  private void removeEldestEntry() {
-//    boolean isRemove = size() > maxsize;
-//    if (isRemove) {
-//      Object obj = this.get(eldest.)
-//    }
-//  }
 }
 
 class CachePair{

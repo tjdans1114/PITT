@@ -10,13 +10,15 @@ public class Global {
 
   public static final String INDEX = "index.html";
 
-  public static final int BUFFER_SIZE = 2*1024*1024;//2MB. temporarily 500kb
+  public static final int BUFFER_SIZE = 512*1024;//2MB. temporarily 500kb
   public static final int LARGE_BUFFER_SIZE = 20*1024*1024; //20 MB
 
 
   public static final int HEADER_SIZE = 1024; // 1024 characters
 
   public static final int TIMEOUT = 1 * 1000; //miliseconds
+
+  public static final int THREAD_MAX = 5;
 
   public static final Map<Integer, String> http_status_map  = new TreeMap<Integer,String>(){
     {
