@@ -39,13 +39,12 @@ public class Event {
   public StringBuffer req_body;
 
   int error_code;
-  /////////////////////////////////////////
-  int content_length;
+
 
   /** Processed Headers */
-  String connection;
+  String connection;//TODO
 
-  FileChannel file_channel; //entailed open bytebuffer : for continuation
+  FileChannel file_channel; //entailed open file channel : for continuation
   int start; //file channel start position
 
   //for 206
@@ -53,12 +52,9 @@ public class Event {
 
   /**************************************************************************************/
   static final String crlf = "\r\n";
-  static final int BODY_LENGTH = 2 * 1024 * 1024;//2MB
-  /*
-    \r = CR (Carriage Return) // Used as a new line character in Mac OS before X
-    \n = LF (Line Feed) // Used as a new line character in Unix/Mac OS X
-    \r\n = CR + LF // Used as a new line character in Windows
-  */
+  static final int BODY_LENGTH = 2 * 1024 * 1024;//2MB TODO?
+
+
 
   /** Constructors ************************************/
   // 1. constructor for NON_IO : i.e. errors
@@ -114,6 +110,5 @@ public class Event {
     this.client = client;
     this.key = key;
     this.type = Type.FINISHED;
-    //this.header_map.put("Connection", "close");
   }
 }

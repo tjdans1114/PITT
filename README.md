@@ -12,7 +12,7 @@
  - uri access 제한
  - ~~Cache : memory 제한 필요~~
  - read buffer 확장, ~~request timeout~~
- - Task의 결과가 새로운 event로 공급되어 event loop내에서 처리되도록 구현 (양방향 통신)
+ - ~~Task의 결과가 새로운 event로 공급되어 event loop내에서 처리되도록 구현 (양방향 통신)~~
  - Benchmarking
     - node js server 구축
     - jmeter로 성능 비교
@@ -85,10 +85,10 @@ Refer to Issue #1
 
 
 <!--## Remark-->
-<!--* DMA : file이 커야 효율 나옴-->
-<!--* 501 vs 405-->
-<!-->Basically, the rule is: <p>-->
-<!-->HTTP 501 for methods we don't recognize <p>-->
-<!-->HTTP 405 for methods we don't recognize for one particular resource. <p>-->
+<!-- * DMA : file이 커야 효율 나옴-->
+<!-- * 501 vs 405-->
+<!-- Basically, the rule is: <p>-->
+<!-- HTTP 501 for methods we don't recognize <p>-->
+<!-- HTTP 405 for methods we don't recognize for one particular resource. <p>-->
 
 <!--- once the socketchannel is closed, it never will be recovered-->

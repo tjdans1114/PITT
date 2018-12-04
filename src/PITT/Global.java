@@ -8,7 +8,9 @@ public class Global {
   public static final String IP = "127.0.0.1"; //localhost
   public static final int PORT = 1111;
 
-  public static final int BUFFER_SIZE = 1048576 * 2/4;//2MB. temporarily 500kb
+  public static final int BUFFER_SIZE = 2*1024*1024;//2MB. temporarily 500kb
+  public static final int LARGE_BUFFER_SIZE = 20*1024*1024; //20 MB
+
 
   public static final int HEADER_SIZE = 1024; // 1024 characters
 
@@ -21,14 +23,15 @@ public class Global {
       put(304,"Not Modified");
       put(400,"Bad Request");
       put(404,"Not Found");
+      put(408,"Request Timeout");
+      put(413,"Payload Too Large");
       put(431,"Request Header Fields Too Large");
       put(500,"Internal Server Error");
       put(501,"Not Implemented");
-      put(505,"HTTP Version Not Supported");//TODO : maybe?
+      put(505,"HTTP Version Not Supported");
 
       //TODO
       put(403,"Forbidden");
-      put(408,"Request Timeout"); //TODO : Advanced
 
       /** Other codes*/
       //1xx Informational response
@@ -68,7 +71,6 @@ public class Global {
       put(410,"Gone");
       put(411,"Length Required");
       put(412,"Precondition Failed");
-      put(413,"Payload Too Large");
       put(414,"URI Too Long");
       put(415,"Unsupported Media Type");
       put(416,"Range Not Satisfiable");

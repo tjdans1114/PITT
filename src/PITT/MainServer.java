@@ -82,11 +82,11 @@ public class MainServer {
           catch(TimeoutException tex){
             EVENT_QUEUE.push(new Event(client,key,408));
           }
+          catch(BufferOverflowException boex){
+            EVENT_QUEUE.push(new Event(client,key,413));
+          }
 
 //          System.out.println("Parsed event enqueued");
-        }
-        else if(key.isWritable()){
-          //TODO : NOTHING!!!
         }
 
         key_iterator.remove();//remove current key
@@ -94,21 +94,40 @@ public class MainServer {
     }
   }
 
-  static String read(SocketChannel client) throws TimeoutException{
+  static String read(SocketChannel client) throws TimeoutException, BufferOverflowException{
     try{
       ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
       buffer.clear();
       //TODO : timeout? read only once or multiple times?
 
       long start_time = System.currentTimeMillis();
+      long total_bytes_read = 0;
 
       while(true){//verification required
-        int bytes_read = client.read(buffer);
-        //System.out.println("buffer reading..." + bytes_read);
+        long bytes_read = client.read(buffer);
+
+        //Timeout
         long current_time = System.currentTimeMillis();
         if(current_time - start_time > Global.TIMEOUT){
           throw new TimeoutException();
         }
+
+        //Buffer Expansion
+        total_bytes_read += bytes_read;
+        if(total_bytes_read >= Global.LARGE_BUFFER_SIZE){
+          //413
+          System.out.println("case -1");
+          throw new BufferOverflowException();
+        }
+        else if(total_bytes_read >= buffer.capacity()){
+          System.out.println("case -2");
+          ByteBuffer new_buffer = ByteBuffer.allocate(Global.LARGE_BUFFER_SIZE);
+          buffer.flip();
+          new_buffer.put(buffer);
+
+          buffer = new_buffer;
+        }
+
 
         //exit conditions
         if(bytes_read == 0){
@@ -116,7 +135,7 @@ public class MainServer {
         }
         if(bytes_read == -1){//client finished sending
 //          System.out.println(client);
-          System.out.println("read finished : closing the channel... " + client);
+//          System.out.println("read finished : closing the channel... " + client);
           client.close();
           break;
         }
@@ -133,12 +152,15 @@ public class MainServer {
       //return StandardCharsets.UTF_8.decode(buffer).toString();
     }
     catch(TimeoutException tex){
-      throw new TimeoutException("TODO");
+      //for 408
+      throw new TimeoutException("Read Timeout!");
+    }
+    catch(BufferOverflowException boex){
+      //for 413
+      throw new BufferOverflowException();
     }
     catch(Exception ex){
-      //TODO : more exception handlings?
       return null;
-
     }
   }
 }
