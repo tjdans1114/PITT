@@ -8,6 +8,8 @@ public class Global {
   public static final String IP = "127.0.0.1"; //localhost
   public static final int PORT = 1111;
 
+  public static final String INDEX = "index.html";
+
   public static final int BUFFER_SIZE = 2*1024*1024;//2MB. temporarily 500kb
   public static final int LARGE_BUFFER_SIZE = 20*1024*1024; //20 MB
 

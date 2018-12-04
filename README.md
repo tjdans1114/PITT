@@ -7,15 +7,16 @@
 ## Implementation detail
 
 ## remaining works
- - 헤더 처리 (connection, last-modified)
+ - 헤더 처리 (connection, ~~last-modified~~)
  - ~~socket close 제대로 하기~~
  - uri access 제한
  - ~~Cache : memory 제한 필요~~
  - read buffer 확장, ~~request timeout~~
  - ~~Task의 결과가 새로운 event로 공급되어 event loop내에서 처리되도록 구현 (양방향 통신)~~
  - Benchmarking
-    - node js server 구축
-    - jmeter로 성능 비교
+    - Node.js Server 구축
+    - ~~Apache Server 구축~~
+    - JMeter로 benchmark
 
 
 ## Documents
@@ -39,16 +40,35 @@ Refer to Issue #1
   - ~~Cacheing : until 12/7?~~
   - Benchmark : until 12/7?
 
+## Benchmark
+> Seongmoon's Macbook : macOS Mojave, 10.14.1
 
-## Remark
-  * Read Request : from client socket
-  * Parse Request : HTTPParser
-  * Find Resource : for file request, (In Thread?), determine location of the resource
-  * Read File : in Thread, File IO
-  * Make Response : after interpreting request, construct response
-  * Write Response : HTTP Response to client socket?
+### PITT Server
+`http://localhost:1111/`
+ - main page setting : `index.html`
 
-<!--## FLOW-->
+### Apache Server
+`http://localhost/~seongmoon/`
+ - Directory location is `~/Sites/`
+
+### Node.js Server
+TODO
+
+### JMeter
+TODO
+
+
+<!-- ## Remark-->
+  <!-- * Read Request : from client socket-->
+  <!-- * Parse Request : HTTPParser-->
+  <!-- * Find Resource : for file request, (In Thread?), determine location of the resource-->
+  <!-- * Read File : in Thread, File IO-->
+  <!-- * Make Response : after interpreting request, construct response-->
+  <!-- * Write Response : HTTP Response to client socket?-->
+
+
+
+<!-- ## FLOW-->
 <!--in main(event loop),-->
 <!--if readable : parse string. enqueue that into event-->
 <!--if writable : ???-->

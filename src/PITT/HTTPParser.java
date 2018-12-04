@@ -52,6 +52,11 @@ public class HTTPParser {
         return new Event(client, key, 505);
       }
 
+      //handling index.html
+      if(uri.equals("/")){
+        uri = "/" + Global.INDEX;
+      }
+
       /** 2. headers : general, request, entity */
       int header_length = 0;
       while(true){
