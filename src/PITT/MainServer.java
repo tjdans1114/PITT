@@ -24,14 +24,16 @@ public class MainServer {
 
     /* Running MainServer */
     System.out.println("server running ... ");
-    int count = 0; //# of clients
+    //int count = 0; //# of clients
 
    
     while(true) {
       selector.select();
       Set<SelectionKey> keys = selector.selectedKeys();
       Iterator<SelectionKey> key_iterator = keys.iterator();
+      //int count_key = 0;
       while (key_iterator.hasNext()) {
+        //count_key++;
         SelectionKey key = key_iterator.next();
         //System.out.println(key);
 
@@ -45,7 +47,7 @@ public class MainServer {
           client.register(selector, SelectionKey.OP_READ); //convert it to readable state
 
           /** do something... */
-          count++;
+          //count++;
           System.out.println("Connection Accepted : " + client.getRemoteAddress() + " -> " + client.getLocalAddress());
         }
         else if (key.isReadable()) {//key is ready for reading
@@ -57,7 +59,7 @@ public class MainServer {
 
           //String client_remote_address = client.getRemoteAddress().toString();
           try{
-            String request_string = read(client);
+            String request_string = read(client,key);
 
             //System.out.println("reading done");
             if(request_string == null || request_string.length() == 0){
@@ -94,10 +96,11 @@ public class MainServer {
 
         key_iterator.remove();//remove current key
       }
+      //System.out.println(count_key);
     }
   }
 
-  static String read(SocketChannel client) throws TimeoutException, BufferOverflowException{
+  static String read(SocketChannel client,SelectionKey key) throws TimeoutException, BufferOverflowException{
     /** supports 408, 413 */
     try{
       ByteBuffer buffer = ByteBuffer.allocate(Global.BUFFER_SIZE);
@@ -136,6 +139,8 @@ public class MainServer {
         if(bytes_read == -1){//client finished sending
           // System.out.println("read finished : closing the channel... " + client);
           client.close();
+          key.selector().wakeup();
+          key.cancel();
           break;
         }
       }
