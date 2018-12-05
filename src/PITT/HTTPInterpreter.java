@@ -22,7 +22,7 @@ public class HTTPInterpreter{
     String first_line = http_version + " " + status_code + " " + status_str;
 
     //2. header
-    String header = "";//TODO?
+    String header = "connection: close"+ "\n";//close whenever error request
 
     //3. body
     String body = Global.ERROR_HTML_MAP.get(status_code);
@@ -42,6 +42,7 @@ public class HTTPInterpreter{
     SelectionKey key = http_request.key;
     try{
       if(type == Event.Type.FINISHED){
+        //System.out.println("FINISHED TYPE");
         handle_connection(http_request);
       }
       else if(type == Event.Type.NON_IO){
@@ -101,8 +102,8 @@ public class HTTPInterpreter{
         //check file
         Date file_date = new Date(file.lastModified());
 
-        if(!req_date.after(file_date)){//A.after B iff A is after B strictly
-          //304 success
+        if(!req_date.before(file_date)){//A.after B iff A is after B strictly
+          //System.out.println("304 success");
           return true;
         }
       }
@@ -112,26 +113,28 @@ public class HTTPInterpreter{
     }
 
     //304 failed
+    //System.out.println("304 failed");
     return false;
   }
 
   public static void handle_connection(Event http_request){//TODO
     //TODO :
     Event.Type type = http_request.type;
-    if(!(type == Event.Type.FINISHED)){
-      return;
-    }
 
     SocketChannel client = http_request.client;
+    SelectionKey key = http_request.key;
 
-    try {
-      System.out.println("closing client : "+ client);
-      client.close();
+    if(type == Event.Type.FINISHED){
+      try {
+        //System.out.println("closing client : "+ client);
+        client.close();
+        //key.selector().wakeup();
+        //key.cancel();
+      }
+      catch(IOException ex){
+        ex.printStackTrace();
+      }
     }
-    catch(IOException ex){
-      ex.printStackTrace();
-    }
-
   }
 }
 
@@ -176,8 +179,6 @@ class FileThread extends Thread{
         }
         //3. 200 + cache try
         else {
-          //TODO : connection header
-
           Date date = new Date(file.lastModified());
 
           String first_line = "HTTP/1.1 200 OK";
@@ -191,7 +192,7 @@ class FileThread extends Thread{
 
           //i). cache hit
           if (Cache.has(event.uri, date)){
-            //System.out.println("cache hit!");
+            System.out.println("cache hit!");
             //1. write first line, headers
 
             ByteBuffer body_buffer = Cache.get(event.uri,date); //copy not aliasing
@@ -201,7 +202,7 @@ class FileThread extends Thread{
           }
           //ii). cache miss
           else {
-            //System.out.println("cache miss!");
+            System.out.println("cache miss!");
             MappedByteBuffer MBbuffer;
             FileChannel input_channel = new FileInputStream(filename).getChannel();
 
@@ -210,7 +211,7 @@ class FileThread extends Thread{
               MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, 0, Global.BUFFER_SIZE);
 
               write(client, MBbuffer);
-              key.attach(new Event(client, key, input_channel, Global.BUFFER_SIZE, "Keep Alive"));//Continue
+              key.attach(new Event(client, key, input_channel, Global.BUFFER_SIZE, "Keep-Alive"));//Continue
             }
             else {//small file
               //System.out.println("case 2");
@@ -257,6 +258,10 @@ class FileThread extends Thread{
   }
 
   private static void write(SocketChannel client, ByteBuffer buffer) throws IOException {
+    if(buffer == null){
+      return;
+    }
+
     while(buffer.hasRemaining()){
       int x = client.write(buffer);
     }
