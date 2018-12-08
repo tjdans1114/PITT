@@ -1,1 +1,3 @@
-node express_server/server.js
+cd node_server
+npm start
+cd  ../

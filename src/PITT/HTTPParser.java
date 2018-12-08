@@ -35,6 +35,7 @@ public class HTTPParser {
 
       /** 1. parse first line : method ,uri, http_version */
       String first_line = reader.readLine();
+      //System.out.println(first_line);
 
       String[] parsed_first_line = first_line.split(space);
       if(parsed_first_line.length != 3){
@@ -50,11 +51,15 @@ public class HTTPParser {
       if(!http_version.equals("HTTP/1.1")){
         return new Event(client, key, 505);
       }
+      if(uri.contains("../")){//simple block logic
+        return new Event(client, key, 403);
+      }
 
-      //handling index.html
+      //handling index.html & base directory
       if(uri.equals("/")){
         uri = "/" + Global.INDEX;
       }
+      uri = Global.Directory + uri;
 
       /** 2. headers : general, request, entity */
       int header_length = 0;

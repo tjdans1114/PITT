@@ -10,7 +10,7 @@ public class Global {
 
   public static final String INDEX = "index.html";
 
-  public static final int BUFFER_SIZE = 512*1024;//2MB. temporarily 500kb
+  public static final int BUFFER_SIZE = 2*1024*1024;//2MB. temporarily 500kb
   public static final int LARGE_BUFFER_SIZE = 20*1024*1024; //20 MB
 
 
@@ -18,7 +18,11 @@ public class Global {
 
   public static final int TIMEOUT = 1 * 1000; //miliseconds
 
-  public static final int THREAD_MAX = 5;
+  public static final int THREAD_MAX = 20;
+
+  public static final String Directory = "data";
+
+
 
   public static final Map<Integer, String> http_status_map  = new TreeMap<Integer,String>(){
     {
@@ -26,6 +30,7 @@ public class Global {
       put(200,"OK");
       put(304,"Not Modified");
       put(400,"Bad Request");
+      put(403,"Forbidden");
       put(404,"Not Found");
       put(408,"Request Timeout");
       put(413,"Payload Too Large");
@@ -34,8 +39,6 @@ public class Global {
       put(501,"Not Implemented");
       put(505,"HTTP Version Not Supported");
 
-      //TODO
-      put(403,"Forbidden");
 
       /** Other codes*/
       //1xx Informational response
@@ -106,6 +109,7 @@ public class Global {
       try{
         put(400, new String(Files.readAllBytes(Paths.get("html/400.html"))));
         put(404, new String(Files.readAllBytes(Paths.get("html/404.html"))));
+        put(403, new String(Files.readAllBytes(Paths.get("html/403.html"))));
         put(408, new String(Files.readAllBytes(Paths.get("html/408.html"))));
 
         put(500, new String(Files.readAllBytes(Paths.get("html/500.html"))));

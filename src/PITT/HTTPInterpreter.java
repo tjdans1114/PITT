@@ -165,7 +165,7 @@ class FileThread extends Thread{
 
       if (event.type == Event.Type.IO) {
         //System.out.println("IO TYPE");
-        String filename = event.uri.substring(1);
+        String filename = event.uri;//.substring(1);
         File file = new File(filename);
         //1. 404
         if (!file.exists()) {
@@ -192,7 +192,7 @@ class FileThread extends Thread{
 
           //i). cache hit
           if (Cache.has(event.uri, date)){
-            System.out.println("cache hit!");
+            //System.out.println("cache hit!");
             //1. write first line, headers
 
             ByteBuffer body_buffer = Cache.get(event.uri,date); //copy not aliasing
@@ -202,7 +202,7 @@ class FileThread extends Thread{
           }
           //ii). cache miss
           else {
-            System.out.println("cache miss!");
+            //System.out.println("cache miss!");
             MappedByteBuffer MBbuffer;
             FileChannel input_channel = new FileInputStream(filename).getChannel();
 
