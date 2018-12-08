@@ -30,3 +30,6 @@ hs_err_pid*
 .idea/workspace.xml
 .idea/markdown-navigator.xml
 .idea/vcs.xml
+
+#node.js express
+*/node_modules/*
