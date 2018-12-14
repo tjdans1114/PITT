@@ -7,7 +7,7 @@
 ## Implementation detail
 
 ## remaining works
- - 헤더 처리 (connection, ~~last-modified~~)
+ - 헤더 처리 (~~connection~~, ~~last-modified~~)
    - handle_connection 수정하기
  - ~~socket close 제대로 하기~~
  - ~~uri access 제한~~ ~~maybe~~
@@ -15,7 +15,8 @@
  - ~~read buffer 확장~~, ~~request timeout~~
  - ~~Task의 결과가 새로운 event로 공급되어 event loop내에서 처리되도록 구현 (양방향 통신)~~
  - Benchmarking
-    - Node.js Server 구축
+    - ~~AWS 열기~~
+    - ~~Node.js Server 구축~~
     - ~~Apache Server 구축~~
     - JMeter로 benchmark
 
@@ -36,31 +37,27 @@ Refer to Issue #1
   - ~~Event Loop Implementation : until 11/9~~
   - ~~HTTP response composition & Interpreter : until 11/16~~ at 11/30
   - ~~Main server execution? : until 11/23~~ at 11/30
-  - debugging : until 11/30
+  - ~~debugging : until 11/30~~
 * Step 3
   - ~~Cacheing : until 12/7?~~
-  - Benchmark : until 12/7?
+  - Benchmark : until 12/14
 
 ## Benchmark
 > AWS EC2 : 8GiB RAM, ubuntu 18.04
 > in AWS, `java`, `node`, `apache2`, `jmeter` installed
-> apache server not yet structured
+> ~~apache server not yet structured~~
 
 ### PITT Server
-port 1111
- ```
- PITT/out/production/PITT$ java PITT.MainServer > log.PITT.txt &
- ```
+`http://ec2-3-17-77-2.us-east-2.compute.amazonaws.com:1111`
  - Directory location is `data/`
  - main page setting : `data/index.html`
 
-### Apache Server : TODO
-`http://localhost/~seongmoon/`
- - prerequisite : `apachectl start`
- - Directory location is `~/Sites/`
+### Apache Server
+`http://ec2-3-17-77-2.us-east-2.compute.amazonaws.com/`
+ - Directory location is `var/www/html`
 
 ### Node.js Server
-port 3000
+`http://ec2-3-17-77-2.us-east-2.compute.amazonaws.com:3000`
  - prerequisite : `PITT/express_server$ npm install`
  - Directory location is `nodejs_server/views/`
 
@@ -70,13 +67,9 @@ port 3000
  - `ssh -i PITT.pem ubuntu@3.17.77.2`
 
 ### JMeter
- - prerequisite :
-    - `brew install jmeter`
- - `JVM_ARGS="-Xms4G -Xmx8G" jmeter -n -t Test\ Plan.jmx -l output.jlt`
- - `set JVM_ARGS="-Xms4096m -Xmx8192m"`
- - `ulimit -u 1024`
-
- ### killing background
+> Windows 10, 16GiB RAM. jmeter GUI mode
+ 
+### killing background
  ```
  jobs
  kill -9 %number (e.g. kill -9 %2)
