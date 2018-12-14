@@ -35,4 +35,5 @@ hs_err_pid*
 */node_modules/*
 
 # log file
-log.txt
+log.PITT.txt
+log.node.txt
