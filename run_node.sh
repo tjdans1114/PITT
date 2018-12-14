@@ -1,3 +1,3 @@
 cd node_server
-npm start > log.node.txt &
+npm start > ../log.node.txt &
 cd  ../

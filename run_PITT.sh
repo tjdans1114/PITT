@@ -1,5 +1,2 @@
-cd out /production/PITT
-java PITT.MainServer > log.PITT.txt &
-cd ../../../
-
+java -cp out/production/PITT PITT.MainServer > log.PITT.txt &
  # compilation required
