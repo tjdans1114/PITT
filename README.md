@@ -47,7 +47,10 @@ Refer to Issue #1
 > apache server not yet structured
 
 ### PITT Server
-`http://localhost:1111/`
+port 1111
+ ```
+ PITT/out/production/PITT$ java PITT.MainServer > log.PITT.txt &
+ ```
  - Directory location is `data/`
  - main page setting : `data/index.html`
 
@@ -57,7 +60,7 @@ Refer to Issue #1
  - Directory location is `~/Sites/`
 
 ### Node.js Server
-`http://localhost:3000/`
+port 3000
  - prerequisite : `PITT/express_server$ npm install`
  - Directory location is `nodejs_server/views/`
 
@@ -73,4 +76,8 @@ Refer to Issue #1
  - `set JVM_ARGS="-Xms4096m -Xmx8192m"`
  - `ulimit -u 1024`
 
- ### 
+ ### killing background
+ ```
+ jobs
+ kill -9 %number (e.g. kill -9 %2)
+ ```
