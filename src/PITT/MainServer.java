@@ -14,7 +14,7 @@ public class MainServer {
 
     Selector selector = Selector.open();
     ServerSocketChannel socket = ServerSocketChannel.open();
-    InetSocketAddress address = new InetSocketAddress(Global.IP,Global.PORT);
+    InetSocketAddress address = new InetSocketAddress(Global.PORT);
     socket.bind(address);
     socket.configureBlocking(false);
 
