@@ -42,14 +42,16 @@ Refer to Issue #1
   - Benchmark : until 12/7?
 
 ## Benchmark
-> Seongmoon's Macbook : macOS Mojave, 10.14.1
+> AWS EC2 : 8GiB RAM, ubuntu 18.04
+> in AWS, `java`, `node`, `apache2`, `jmeter` installed
+> apache server not yet structured
 
 ### PITT Server
 `http://localhost:1111/`
  - Directory location is `data/`
  - main page setting : `data/index.html`
 
-### Apache Server
+### Apache Server : TODO
 `http://localhost/~seongmoon/`
  - prerequisite : `apachectl start`
  - Directory location is `~/Sites/`
@@ -58,6 +60,11 @@ Refer to Issue #1
 `http://localhost:3000/`
  - prerequisite : `PITT/express_server$ npm install`
  - Directory location is `nodejs_server/views/`
+
+### AWS
+`ec2-3-17-77-2.us-east-2.compute.amazonaws.com`
+ - `chmod PITT.pem`
+ - `ssh -i PITT.pem ubuntu@3.17.77.2`
 
 ### JMeter
  - prerequisite :
