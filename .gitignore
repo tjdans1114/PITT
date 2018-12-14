@@ -1,5 +1,5 @@
 # Compiled class file
-*.class
+# *.class
 
 # Log file
 *.log
@@ -33,3 +33,6 @@ hs_err_pid*
 
 #node.js express
 */node_modules/*
+
+# log file
+log.txt
