@@ -37,3 +37,6 @@ hs_err_pid*
 # log file
 log.PITT.txt
 log.node.txt
+
+# security
+*.pem
