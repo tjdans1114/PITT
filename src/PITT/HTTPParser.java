@@ -48,9 +48,9 @@ public class HTTPParser {
       if(!is_supported_method(method)){//unsupported method : 501
         return new Event(client, key, 501);
       }
-      if(!http_version.equals("HTTP/1.1")){
-        return new Event(client, key, 505);
-      }
+//      if(!http_version.equals("HTTP/1.1")){
+//        return new Event(client, key, 505);
+//      }
       if(uri.contains("../")){//simple block logic
         return new Event(client, key, 403);
       }
