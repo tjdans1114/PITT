@@ -9,7 +9,18 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 public class MainServer {
-  public static void main(String[] args) throws IOException{
+  public static void main(String[] args) {
+    while(true){
+      try{
+        run();
+      }
+      catch(Exception ex){
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  public static void run() throws IOException{
     /* Basic Server Configuration */
 
     Selector selector = Selector.open();
@@ -18,7 +29,7 @@ public class MainServer {
     socket.bind(address);
     socket.configureBlocking(false);
 
-      //ops : operation set
+    //ops : operation set
     int ops = socket.validOps();
     socket.register(selector,ops,null);
 
@@ -26,7 +37,7 @@ public class MainServer {
     System.out.println("server running ... ");
     //int count = 0; //# of clients
 
-   
+
     while(true) {
       selector.select();
       Set<SelectionKey> keys = selector.selectedKeys();
