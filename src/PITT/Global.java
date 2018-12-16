@@ -18,7 +18,7 @@ public class Global {
 
   public static final int TIMEOUT = 1 * 1000; //miliseconds
 
-  public static final int THREAD_MAX = 20;
+  public static final int THREAD_MAX = 2000000;
 
   public static final String Directory = "data";
 

@@ -10,14 +10,14 @@ import java.util.concurrent.TimeoutException;
 
 public class MainServer {
   public static void main(String[] args) {
-    while(true){
+    //while(true){
       try{
         run();
       }
       catch(Exception ex){
         ex.printStackTrace();
       }
-    }
+    //}
   }
 
   public static void run() throws IOException{

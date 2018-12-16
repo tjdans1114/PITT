@@ -60,17 +60,18 @@ public class HTTPInterpreter{
       }
       //CONT or IO
       else if(type == Event.Type.CONTINUATION || type == Event.Type.IO){
-        int thread_num = get_free_thread();
-        if(thread_num != -1){
-          THREAD_POOL[thread_num] = true;
-          FileThread f = new FileThread(thread_num, http_request);
+        //int thread_num = get_free_thread();
+        //if(thread_num != -1){
+        //  THREAD_POOL[thread_num] = true;
+//          FileThread f = new FileThread(thread_num, http_request);
+          FileThread f = new FileThread(0, http_request);
           f.start();
-          THREAD_POOL[thread_num] = false;
-        }
-        else{
-          //System.out.println("Thread full, re-enqueueing to the queue");
-          return http_request;
-        }
+        //  THREAD_POOL[thread_num] = false;
+//        }
+//        else{
+//          //System.out.println("Thread full, re-enqueueing to the queue");
+//          return http_request;
+//        }
       }
     }
     catch(Exception ex){
@@ -220,6 +221,7 @@ class FileThread extends Thread{
               Cache.set(event.uri,MBbuffer,date);//maintain cache
 
               write(client, MBbuffer);
+              input_channel.close();
               key.attach(new Event(client, key));//Finished
             }
           }
@@ -243,6 +245,7 @@ class FileThread extends Thread{
           MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, input_channel.size()-read_start);
 
           write(client,MBbuffer);
+          input_channel.close();
           key.attach(new Event(client, key)); //Finished
         }
       }
