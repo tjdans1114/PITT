@@ -220,6 +220,7 @@ class FileThread extends Thread{
               Cache.set(event.uri,MBbuffer,date);//maintain cache
 
               write(client, MBbuffer);
+              input_channel.close();
               key.attach(new Event(client, key));//Finished
             }
           }
@@ -243,6 +244,7 @@ class FileThread extends Thread{
           MBbuffer = input_channel.map(FileChannel.MapMode.READ_ONLY, read_start, input_channel.size()-read_start);
 
           write(client,MBbuffer);
+          input_channel.close();
           key.attach(new Event(client, key)); //Finished
         }
       }
