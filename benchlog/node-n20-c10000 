@@ -1,0 +1,44 @@
+This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking ec2-3-17-77-2.us-east-2.compute.amazonaws.com (be patient)
+
+
+Server Software:        
+Server Hostname:        ec2-3-17-77-2.us-east-2.compute.amazonaws.com
+Server Port:            3000
+
+Document Path:          /text.txt
+Document Length:        9261 bytes
+
+Concurrency Level:      10000
+Time taken for tests:   377.790 seconds
+Complete requests:      200000
+Failed requests:        76211
+   (Connect: 0, Receive: 7727, Length: 60688, Exceptions: 7796)
+Keep-Alive requests:    139312
+Total transferred:      1339703389 bytes
+HTML transferred:       1297769957 bytes
+Requests per second:    529.39 [#/sec] (mean)
+Time per request:       18889.489 [ms] (mean)
+Time per request:       1.889 [ms] (mean, across all concurrent requests)
+Transfer rate:          3463.05 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0 2252 7975.7      0   69613
+Processing:     0 10095 29131.9   2569  365540
+Waiting:        0 2950 8965.9    480  122325
+Total:          0 12347 30715.7   3844  374608
+
+Percentage of the requests served within a certain time (ms)
+  50%   3844
+  66%   4999
+  75%   5009
+  80%   7462
+  90%  24921
+  95%  69868
+  98%  130444
+  99%  131072
+ 100%  374608 (longest request)
