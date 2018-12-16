@@ -1,9 +1,9 @@
 # PITT
 
-![logo](Logo.png)
+![logo](data/Logo.png)
 
 ## Structure
-
+![logo](data/structure.png)
 ## Implementation detail
 
 ## remaining works
@@ -40,7 +40,7 @@ Refer to Issue #1
   - ~~debugging : until 11/30~~
 * Step 3
   - ~~Cacheing : until 12/7?~~
-  - Benchmark : until 12/14
+  - ~~Benchmark : until 12/14~~
 
 ## Benchmark
 > AWS EC2 : 8GiB RAM, ubuntu 18.04
@@ -54,12 +54,12 @@ Refer to Issue #1
 
 ### Apache Server
 `http://ec2-3-17-77-2.us-east-2.compute.amazonaws.com/`
- - Directory location is `var/www/html`
+ - Directory location is `/var/www/html`
 
 ### Node.js Server
 `http://ec2-3-17-77-2.us-east-2.compute.amazonaws.com:3000`
  - prerequisite : `PITT/express_server$ npm install`
- - Directory location is `nodejs_server/views/`
+ - Directory location is `node_server/views/`
 
 ### AWS
 `ec2-3-17-77-2.us-east-2.compute.amazonaws.com`
