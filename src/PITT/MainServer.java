@@ -83,7 +83,7 @@ public class MainServer {
             //System.out.println("Parse Complete");
             key.attach(ev);
             key.interestOps(SelectionKey.OP_WRITE);
-
+            key.selector().wakeup();
           }
           catch(TimeoutException tex){
             key.attach(new Event(client,key,408));
@@ -102,7 +102,14 @@ public class MainServer {
           }
 
           Event cont = HTTPInterpreter.respond(event);//buffer write occurr
-          key.attach(cont);
+          if(cont == null){
+            continue;
+          }
+          else {
+            key.attach(cont);
+            key.interestOps(SelectionKey.OP_WRITE);
+            key.selector().wakeup();
+          }
         }
 
         key_iterator.remove();//remove current key

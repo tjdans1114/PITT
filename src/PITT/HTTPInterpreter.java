@@ -129,8 +129,8 @@ public class HTTPInterpreter{
       try {
         //System.out.println("closing client : "+ client);
         client.close();
-        //key.selector().wakeup();
-        //key.cancel();
+        key.selector().wakeup();
+        key.cancel();
       }
       catch(IOException ex){
         ex.printStackTrace();
