@@ -39,6 +39,7 @@ public class MainServer {
 
 
     while(true) {
+      try {
       selector.select();
       Set<SelectionKey> keys = selector.selectedKeys();
       Iterator<SelectionKey> key_iterator = keys.iterator();
@@ -48,7 +49,7 @@ public class MainServer {
         SelectionKey key = key_iterator.next();
         //System.out.println(key);
 
-        try {
+
           if (key.isAcceptable()) {//key can accept client
             SocketChannel client = socket.accept(); // get client socket
             //System.out.println(client);
@@ -110,11 +111,12 @@ public class MainServer {
 
           key_iterator.remove();//remove current key
         }
-        catch(Exception ex){
-          ex.printStackTrace();
-        }
       }
       //System.out.println(count_key);
+
+      catch(Exception ex){
+        ex.printStackTrace();
+      }
     }
   }
 
