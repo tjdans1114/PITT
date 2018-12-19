@@ -48,71 +48,71 @@ public class MainServer {
         SelectionKey key = key_iterator.next();
         //System.out.println(key);
 
-        if (key.isAcceptable()) {//key can accept client
-          SocketChannel client = socket.accept(); // get client socket
-          //System.out.println(client);
-          if(client == null){
-            continue;
-          }
-          client.configureBlocking(false);//non-blocking
-          client.register(selector, SelectionKey.OP_READ); //convert it to readable state
-
-          /** do something... */
-          //count++;
-          //System.out.println("Connection Accepted : " + client.getRemoteAddress() + " -> " + client.getLocalAddress());
-        }
-        else if (key.isReadable()) {//key is ready for reading
-          SocketChannel client = (SocketChannel) key.channel();
-          //System.out.println("reading from client...");
-          if(!client.isConnected()){
-            continue;
-          }
-
-          //String client_remote_address = client.getRemoteAddress().toString();
-          try{
-            String request_string = read(client,key);
-
-            //System.out.println("reading done");
-            if(request_string == null || request_string.length() == 0){
+        try {
+          if (key.isAcceptable()) {//key can accept client
+            SocketChannel client = socket.accept(); // get client socket
+            //System.out.println(client);
+            if (client == null) {
               continue;
             }
-            //System.out.println("Request : " + request_string + " from " + client_remote_address);
+            client.configureBlocking(false);//non-blocking
+            client.register(selector, SelectionKey.OP_READ); //convert it to readable state
 
-            //System.out.println(request_string);
-            Event ev = HTTPParser.parse(client,key,request_string);
-            //System.out.println("Parse Complete");
-            key.attach(ev);
-            key.interestOps(SelectionKey.OP_WRITE);
-            key.selector().wakeup();
-          }
-          catch(TimeoutException tex){
-            key.attach(new Event(client,key,408));
-          }
-          catch(BufferOverflowException boex){
-            key.attach(new Event(client,key,413));
+            /** do something... */
+            //count++;
+            //System.out.println("Connection Accepted : " + client.getRemoteAddress() + " -> " + client.getLocalAddress());
+          } else if (key.isReadable()) {//key is ready for reading
+            SocketChannel client = (SocketChannel) key.channel();
+            //System.out.println("reading from client...");
+            if (!client.isConnected()) {
+              continue;
+            }
+
+            //String client_remote_address = client.getRemoteAddress().toString();
+            try {
+              String request_string = read(client, key);
+
+              //System.out.println("reading done");
+              if (request_string == null || request_string.length() == 0) {
+                continue;
+              }
+              //System.out.println("Request : " + request_string + " from " + client_remote_address);
+
+              //System.out.println(request_string);
+              Event ev = HTTPParser.parse(client, key, request_string);
+              //System.out.println("Parse Complete");
+              key.attach(ev);
+              key.interestOps(SelectionKey.OP_WRITE);
+              key.selector().wakeup();
+            } catch (TimeoutException tex) {
+              key.attach(new Event(client, key, 408));
+            } catch (BufferOverflowException boex) {
+              key.attach(new Event(client, key, 413));
+            }
+
+            //System.out.println("Parsed event enqueued");
+          } else if (key.isWritable()) {
+            //System.out.println("writing!");
+            Event event = (Event) key.attachment();
+            if (event == null) {//another thread is working on it
+              continue;
+            }
+
+            Event cont = HTTPInterpreter.respond(event);//buffer write occurr
+            if (cont == null) {
+              continue;
+            } else {
+              key.attach(cont);
+              key.interestOps(SelectionKey.OP_WRITE);
+              key.selector().wakeup();
+            }
           }
 
-          //System.out.println("Parsed event enqueued");
+          key_iterator.remove();//remove current key
         }
-        else if(key.isWritable()){
-          //System.out.println("writing!");
-          Event event = (Event) key.attachment();
-          if(event == null){//another thread is working on it
-            continue;
-          }
-
-          Event cont = HTTPInterpreter.respond(event);//buffer write occurr
-          if(cont == null){
-            continue;
-          }
-          else {
-            key.attach(cont);
-            key.interestOps(SelectionKey.OP_WRITE);
-            key.selector().wakeup();
-          }
+        catch(Exception ex){
+          ex.printStackTrace();
         }
-
-        key_iterator.remove();//remove current key
       }
       //System.out.println(count_key);
     }
